@@ -20,8 +20,9 @@ remote automatically:
 
 Check the required video-use location before acting. Do not inspect only for a `.git`
 directory: in a linked worktree, `.git` is a file. The following preflight
-recognizes both normal checkouts and linked worktrees, and rejects any existing
-path that is not the expected clean repository:
+recognizes both normal checkouts and linked worktrees. It returns `2` for an
+absent path, `3` for the official repository with local changes, and `1` for
+anything that is not the official repository:
 
 ```sh
 inspect_repo() {
@@ -56,24 +57,23 @@ inspect_repo() {
   status=$(git -C "$repo" status --short) || return 1
   printf '%s\n' "repo=$repo" "origin=$actual_origin" \
     "branch=$branch" "commit=$commit" "status=${status:-clean}"
-  [ -z "$status" ] || {
-    printf '%s\n' "STOP: repository is dirty: $repo" >&2
-    return 1
-  }
+  [ -z "$status" ] || return 3
 }
 
 video_use_origin=https://github.com/browser-use/video-use.git
 inspect_repo "$HOME/Developer/video-use" "$video_use_origin" || {
   result=$?
-  [ "$result" -eq 2 ] || exit 1
+  [ "$result" -eq 2 ] || [ "$result" -eq 3 ] || exit 1
 }
 command -v git uv ffmpeg ffprobe python3
 ```
 
 The `2` result means the expected path is absent and may be proposed for an
-approved clone. Every other failure is a hard stop. In particular, an existing
-non-repository path, missing or mismatched origin, invalid commit, or non-empty
-status must stop the workflow before pull, reset, reclone, dependency install,
+approved clone. The `3` result (official origin, half-finished local changes)
+and a clean checkout too old for `helpers/render.py --no-subtitles` are proposed
+as one repair item; see section 2. Every other failure is a hard stop: an
+existing non-repository path, a missing or mismatched origin, or an invalid
+commit must stop the workflow before pull, reset, reclone, dependency install,
 or Skill registration. Report the evidence and ask the user to resolve it or
 choose a separate safe action. A clean fork is still the wrong repository.
 
@@ -99,8 +99,9 @@ if command -v fc-list >/dev/null 2>&1; then
 fi
 ```
 
-HyperFrames draws the captions and CSS effects, so it is part of step 2. It
-needs Node.js 22 or newer and downloads its own headless Chrome:
+HyperFrames By HeyGen draws the captions and CSS effects. Its agent skills are
+installed in step 1 and its pinned render CLI and headless Chrome in step 2.
+Both need Node.js 22 or newer:
 
 ```sh
 node_major=$(node -p 'process.versions.node.split(".")[0]') || exit 1
@@ -119,7 +120,8 @@ the user's existing Node.js on your own.
 
 Before mutation, show an approval checklist tailored to what is missing:
 
-- clone or update the source repositories;
+- clone the source repositories, or back up local changes and update the
+  official video-use checkout;
 - install Python, Node, FFmpeg, or package dependencies;
 - download and install the Source Han Sans TW subtitle font files;
 - download a large dependency or full media baseline;
@@ -130,7 +132,7 @@ Wait for a clear approval that covers the proposed changes. Do not treat a
 request to “set it up” as approval after discovery reveals extra changes. Git
 state can drift while approval is pending, so rerun the applicable `inspect_repo`
 preflight immediately before every dependency installation and Skill
-registration. Stop if origin, branch/commit validity, or cleanliness changed.
+registration. Stop if origin or branch/commit validity changed.
 
 ## 2. Install or repair video-use
 
@@ -146,6 +148,29 @@ inspect_repo "$HOME/Developer/video-use" "https://github.com/browser-use/video-u
 cd "$HOME/Developer/video-use"
 uv sync
 ```
+
+For the official checkout with half-finished local changes (or too old for
+`--no-subtitles`), back up first, then update. Nothing is deleted, and ignored
+files such as `.env` are not touched by `git stash --include-untracked`:
+
+```sh
+repo="$HOME/Developer/video-use"
+ts=$(date +%Y%m%d-%H%M%S)
+backup_dir="$HOME/Developer/video-use-backups"
+mkdir -p "$backup_dir"
+git -C "$repo" status --short > "$backup_dir/video-use-$ts.status.txt"
+git -C "$repo" diff --binary HEAD > "$backup_dir/video-use-$ts.patch"
+(cd "$repo" && git ls-files --others --exclude-standard -z |
+  tar -cf "$backup_dir/video-use-$ts-new-files.tar" --null -T -)
+git -C "$repo" stash push --include-untracked -m "chatgpt-video-editing auto-backup $ts"
+git -C "$repo" pull --ff-only
+inspect_repo "$repo" "https://github.com/browser-use/video-use.git"
+```
+
+Tell the user the backup location and the restore command
+(`cd ~/Developer/video-use && git stash pop`). If the fast-forward fails
+(detached HEAD, diverged branch, offline), keep the current commit and report
+it; never reset or force.
 
 Use the repository's current `install.md` and lockfile/package metadata at the
 checked-out revision. If it directs a different supported installer, explain
@@ -238,10 +263,23 @@ font, treat that as a separate approval item and follow the official
 `SourceHanSansReadMe.pdf` in the upstream repository for the configuration
 choice.
 
-## 4. Install HyperFrames for captions and CSS effects
+## 4. Install HyperFrames By HeyGen
 
-Part of the step-2 approval list. Use the pinned npm CLI; no repository clone,
-`bun install`, or HyperFrames agent Skills are needed for this workflow:
+Step 1 (skills). In the Codex app the user can add the plugin "HyperFrames by
+HeyGen" from 「外掛程式」. Otherwise use the pinned CLI, which installs the
+skills globally for Claude Code and `~/.agents/skills` and links them into the
+other agents it finds; it never removes a skill:
+
+```sh
+npx -y hyperframes@0.9.86 skills check --json   # summary.coreMissing / outdated
+npx -y hyperframes@0.9.86 skills                # install (core missing)
+npx -y hyperframes@0.9.86 skills update         # refresh (outdated)
+```
+
+A new chat (or restarting the app) loads newly installed skills.
+
+Step 2 (render CLI). Part of the step-2 approval list. Use the pinned npm CLI;
+no repository clone or `bun install` is needed:
 
 ```sh
 npx -y hyperframes@0.9.86 --version
@@ -277,11 +315,12 @@ if command -v fc-list >/dev/null 2>&1; then
 fi
 ```
 
-Verify HyperFrames and its render browser:
+Verify HyperFrames (skills, CLI and render browser):
 
 ```sh
 node_major=$(node -p 'process.versions.node.split(".")[0]') || exit 1
 [ "$node_major" -ge 22 ] || exit 1
+npx --no-install hyperframes@0.9.86 skills check --json
 npx --no-install hyperframes@0.9.86 --version
 chrome=$(npx --no-install hyperframes@0.9.86 browser path | tail -n 1)
 test -e "$chrome"

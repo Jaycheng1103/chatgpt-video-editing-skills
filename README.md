@@ -1,6 +1,6 @@
 # ChatGPT 剪短影音 Skills
 
-一組給可操作本機檔案與終端機的 AI Agent（Codex／ChatGPT、Claude Code 等）使用的繁體中文 Skills。裝好之後，你只要跟著 Agent 的問題一步一步回答，就能把自己拍的影片剪成直式短影音：它會自動檢查電腦、幫你裝好需要的工具、串接 ElevenLabs、裝好 Agent Reach，再陪你從放影片走到正式成片。
+一組給可操作本機檔案與終端機的 AI Agent（Codex／ChatGPT、Claude Code 等）使用的繁體中文 Skills。裝好之後，你只要跟著 Agent 的問題一步一步回答，就能把自己拍的影片剪成直式短影音：它會自動檢查電腦、串接 ElevenLabs 和 HyperFrames By HeyGen、幫你裝好或升級需要的工具（舊版、改到一半的也會先備份再修好），再陪你從放影片走到正式成片。
 
 它會保護原始素材、上傳前先問你、不印出金鑰，並以實際輸出與 QA 證據為準，不把計畫或沒驗證的檔案說成完成品。
 
@@ -8,12 +8,12 @@
 
 | 步驟 | 你會做什麼 | Agent 會做什麼 |
 | --- | --- | --- |
-| 1. 串接 ElevenLabs 和安裝 Agent Reach | 在跳出的 ElevenLabs 登入頁按「允許」 | 自動檢查環境，裝好或升級 Agent Reach，把 ElevenLabs 官方雲端 MCP 加到你的 Agent |
-| 2. 安裝 AI 剪輯工具包並完成下載配置 | 說一次「好」，再把 API 金鑰貼進它幫你打開的檔案 | 一次裝好 FFmpeg、video-use、思源黑體字幕字體、做字幕與 CSS 特效的 HyperFrames，並建立受保護的金鑰檔 |
+| 1. 串接 ElevenLabs 和 HyperFrames By HeyGen | 在跳出的 ElevenLabs 登入頁按「允許」（用 Codex App 時，也可以自己在「外掛程式」加入 ElevenLabs 和 HyperFrames by HeyGen） | 自動檢查環境，把 ElevenLabs 官方雲端 MCP 加到你的 Agent，裝好或更新 HyperFrames 技能，順便裝好或升級 Agent Reach |
+| 2. 安裝 AI 剪輯工具包並完成下載配置 | 說一次「好」，再把 API 金鑰貼進它幫你打開的檔案 | 一次裝好 FFmpeg、video-use（舊版或改到一半的會先備份再更新）、思源黑體字幕字體、HyperFrames 渲染工具，並建立受保護的金鑰檔 |
 | 3. 放入想要剪輯的影片 | 把影片拖進來 | 檢查影片規格，原檔不動，在旁邊建立 `edit/` |
 | 4. 取得剪輯建議並用 ElevenLabs 拿到逐字稿 | 同意上傳 | 用 ElevenLabs Scribe v2 轉出逐字時間碼，整理成編號段落，給你 4–8 句剪輯建議 |
-| 5. 詢問是否刪減逐字稿 | 說要刪哪幾段 | 只刪減與換位置，不改你說過的話 |
-| 6. 提供想參考的剪輯風格 | 貼一支 IG、TikTok、YouTube Shorts 或 X 的短影音連結 | 下載並量測節奏、看字幕樣式，寫成「風格配方」 |
+| 5. 刪減逐字稿 | 說要刪哪幾段 | 只刪減與換位置，不改你說過的話 |
+| 6. 提供想參考的剪輯風格的短影音 | 貼一支 IG、TikTok、YouTube Shorts 或 X 的短影音連結 | 下載並量測節奏、看字幕樣式，寫成「風格配方」 |
 | 7. 剪輯出品 | 看 720p 預覽，說「可以」或要改哪裡 | 粗剪、一行最多 8 字的字幕、跟著內容出現的 CSS 特效、混音、預覽 QA，核准後輸出並驗證 1080×1920 正式檔 |
 
 每一步結束，Agent 都會用一個問題帶你進下一步。
@@ -22,7 +22,7 @@
 
 | Skill | 負責 | 不會做的事 |
 | --- | --- | --- |
-| [`chatgpt-video-editing-setup`](skills/chatgpt-video-editing-setup/SKILL.md) | 第 1–2 步：自動檢查（`scripts/check_env.sh`）、一次核准後安裝（`scripts/install_missing.sh`）、ElevenLabs MCP 串接、Agent Reach、video-use、FFmpeg、思源黑體 TW、HyperFrames、金鑰檔（`scripts/prepare_key_file.sh`） | 不上傳素材、不轉寫、不剪輯 |
+| [`chatgpt-video-editing-setup`](skills/chatgpt-video-editing-setup/SKILL.md) | 第 1–2 步：自動檢查（`scripts/check_env.sh`）、一次核准後安裝（`scripts/install_missing.sh`）、ElevenLabs MCP 串接、HyperFrames 技能與渲染工具、Agent Reach、video-use（含備份後修復）、FFmpeg、思源黑體 TW、金鑰檔（`scripts/prepare_key_file.sh`） | 不上傳素材、不轉寫、不剪輯 |
 | [`chatgpt-short-video-editor`](skills/chatgpt-short-video-editor/SKILL.md) | 第 3–7 步：素材檢查、逐字稿、剪輯建議、刪減、參考風格分析（`scripts/analyze_reference.sh`）、粗剪、字幕（`scripts/build_captions.py`）、CSS 特效（`scripts/build_effects.py`）、合成（`scripts/compose_video.py`）、預覽、QA 與正式輸出 | 不自己安裝或修環境；缺東西時帶你回第 1–2 步 |
 
 ## 安裝
@@ -68,9 +68,9 @@ npx skills remove chatgpt-video-editing-setup chatgpt-short-video-editor
 - macOS 或 Linux。缺 FFmpeg 時，macOS 用 Homebrew 安裝；沒有 Homebrew 或 Linux 需要 `sudo` 時，Agent 會給你指令請你自己在終端機輸入密碼。
 - [ElevenLabs](https://elevenlabs.io) 帳號：官方雲端 MCP（`https://api.elevenlabs.io/v1/mcp`，用 OAuth 登入）負責串接帳號；逐字稿用 [Scribe v2](https://elevenlabs.io/docs/capabilities/speech-to-text) API 金鑰取得每個字的時間碼。兩者都會用到你帳號的額度，免費帳號每月額度有限，實際額度以 ElevenLabs 後台為準。
 - 其餘由第 1–2 步自動安裝：[uv](https://docs.astral.sh/uv/)、[Agent Reach](https://github.com/Panniantong/Agent-Reach)（只從官方 GitHub release 安裝，不用 PyPI 上同名套件）、[video-use](https://github.com/browser-use/video-use) 完整 Repo、[FFmpeg](https://ffmpeg.org/) 與 `ffprobe`、[思源黑體（Source Han Sans）](https://github.com/adobe-fonts/source-han-sans) TW 子集 OTF（SIL Open Font License 1.1）、[Pillow](https://python-pillow.github.io/)。
-- [HyperFrames](https://github.com/heygen-com/hyperframes)（固定版本 0.9.86）在第 2 步一起安裝，用 HTML、CSS 與 GSAP 畫字幕和特效，需要 Node.js 22 或更新版本。沒有 Node.js 時 macOS 會用 Homebrew 安裝；已經有較舊的 Node.js 時 Agent 會停下來問你，不會自己換掉。
+- [HyperFrames By HeyGen](https://github.com/heygen-com/hyperframes)（固定版本 0.9.86）：第 1 步裝技能（`npx -y hyperframes@0.9.86 skills`，或 Codex App「外掛程式」裡的 HyperFrames by HeyGen），第 2 步裝渲染工具，用 HTML、CSS 與 GSAP 畫字幕和特效，需要 Node.js 22 或更新版本。沒有 Node.js 時 macOS 會用 Homebrew 安裝；已經有較舊的 Node.js 時 Agent 會停下來問你，不會自己換掉。
 
-自動安裝不會越過這些安全底線：既有 video-use 有未提交修改或來源不是官方 Repo 時會停下；既有字體檔、Skill 連結不覆寫；金鑰只由你自己貼進檔案。
+自動安裝會幫你修好能修的：既有 video-use 有改到一半的修改或是舊版時，先把修改備份到 `~/Developer/video-use-backups/` 和 `git stash`（隨時可用 `git stash pop` 還原），再更新成官方最新版；Agent Reach 舊版 1.5 直接升級，金鑰和設定保留。不會越過的安全底線：來源不是官方 Repo 時停下；既有字體檔、Skill 連結不覆寫；不刪除任何東西；金鑰只由你自己貼進檔案。
 
 ## 隱私、憑證與費用
 

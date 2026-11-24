@@ -93,12 +93,14 @@ Report observations, not assumptions:
 
 | Check | Evidence to report |
 | --- | --- |
-| video-use source | stable path, origin URL, clean Git status, helpers directory |
+| video-use source | stable path, origin URL, clean Git status, helpers directory; after a repair, the backup paths and the stash name |
 | runtime | paths or versions for Python/uv, FFmpeg, and ffprobe |
 | subtitle font | `SourceHanSansTW-Regular.otf` and `SourceHanSansTW-Bold.otf` present as regular files in the platform font directory, `OTTO` magic verified, and the `fc-list` match where fontconfig exists |
 | video-use registration | agent Skills path and symlink target, if one was approved |
 | credential | source present and `.env` mode/ignore check, without value |
+| HyperFrames By HeyGen skills | `hyperframes skills check --json` reports `coreMissing` 0 and `outdated` 0 (or the Codex plugin "HyperFrames by HeyGen" shows as added) |
 | captions and CSS effects | Node.js 22+, `hyperframes@0.9.86` runs from the npx cache, its render browser path exists, FFmpeg lists the `libvpx-vp9` decoder |
+| Agent Reach | `agent-reach version` prints JSON (1.6+); a 1.5 install was upgraded, not left as is |
 | no-cost boundary | confirmation that no media was uploaded, transcribed, edited, previewed, or rendered |
 
 If a check fails, report it as incomplete with the next proposed mutation; do

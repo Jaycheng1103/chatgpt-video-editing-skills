@@ -11,12 +11,12 @@ recommended answer first. No emoji unless the user uses them.
 
 | 步驟 | 名稱 | 負責 Skill |
 | --- | --- | --- |
-| 1 | 串接 ElevenLabs 和安裝 Agent Reach | `chatgpt-video-editing-setup` |
+| 1 | 串接 ElevenLabs 和 HyperFrames By HeyGen | `chatgpt-video-editing-setup` |
 | 2 | 安裝 AI 剪輯工具包並完成下載配置 | `chatgpt-video-editing-setup` |
 | 3 | 放入想要剪輯的影片 | `chatgpt-short-video-editor` |
 | 4 | 取得剪輯建議並用 ElevenLabs 拿到逐字稿 | `chatgpt-short-video-editor` |
-| 5 | 詢問是否刪減逐字稿 | `chatgpt-short-video-editor` |
-| 6 | 提供想參考的剪輯風格 | `chatgpt-short-video-editor` |
+| 5 | 刪減逐字稿 | `chatgpt-short-video-editor` |
+| 6 | 提供想參考的剪輯風格的短影音 | `chatgpt-short-video-editor` |
 | 7 | 剪輯出品 | `chatgpt-short-video-editor` |
 
 If a user starts at step 3 or later, run the setup Skill's `check_env.sh`
@@ -62,7 +62,7 @@ Run by `chatgpt-video-editing-setup`. They end with:
 - Checkpoint: transcript file exists and was read; strategy given.
 - Closing question leads to step 5.
 
-## 第 5 步：詢問是否刪減逐字稿
+## 第 5 步：刪減逐字稿
 
 - Ask: 「逐字稿和建議都在上面了。我建議刪掉第 ③、⑦ 段（重複講的地方），
   剪完大約 70 秒。你想照這樣刪，還是有其他段落想刪或想留？」
@@ -75,7 +75,7 @@ Run by `chatgpt-video-editing-setup`. They end with:
   直接貼 IG、TikTok、YouTube Shorts 或 X 的連結給我，我照它的節奏和字幕樣式來剪。
   沒有的話我就用乾淨的口播風格，也可以。」
 
-## 第 6 步：提供想參考的剪輯風格
+## 第 6 步：提供想參考的剪輯風格的短影音
 
 - Follow [the style reference guide](style-reference.md): fetch the link with
   the tools Agent Reach installed, measure it with

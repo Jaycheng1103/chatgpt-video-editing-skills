@@ -1,7 +1,7 @@
 #!/bin/sh
 # Read-only environment check for the AI short-video editing toolkit.
 # It never installs, downloads, uploads, or prints a credential.
-# Output: one "CHECK <item> <ok|missing|old|stop|info> <detail>" line per item,
+# Output: one "CHECK <item> <ok|missing|old|dirty|stop|info> <detail>" line per item,
 # then "NEED_STEP1=" and "NEED_STEP2=" summary lines the agent can act on.
 set -u
 
@@ -53,10 +53,8 @@ inspect_repo() {
   status=$(git -C "$repo" status --short) || return 1
   printf '%s\n' "repo=$repo" "origin=$actual_origin" \
     "branch=$branch" "commit=$commit" "status=${status:-clean}"
-  [ -z "$status" ] || {
-    printf '%s\n' "STOP: repository is dirty: $repo" >&2
-    return 1
-  }
+  # Dirty but official: step 2 backs the changes up and repairs it (exit 3).
+  [ -z "$status" ] || return 3
 }
 
 # --- platform and agents -----------------------------------------------------
@@ -87,7 +85,7 @@ if command -v agent-reach >/dev/null 2>&1; then
   ver=$(agent-reach version 2>/dev/null | head -n 1)
   case "$ver" in
     \{*) say agent-reach ok "1.6+ (JSON output)" ;;
-    *) say agent-reach old "$ver; upgrade to 1.6+ with uv"; add1 agent-reach ;;
+    *) say agent-reach old "$ver; step 1 upgrades it to 1.6+ (keys and settings are kept)"; add1 agent-reach ;;
   esac
 else
   say agent-reach missing "install from the official GitHub release"; add1 agent-reach
@@ -116,6 +114,37 @@ if command -v claude >/dev/null 2>&1; then
 fi
 [ "$mcp_found" = yes ] || add1 elevenlabs-mcp
 
+# --- step 1: HyperFrames By HeyGen skills (Node.js 22+) -----------------------
+node_ok=no
+if command -v node >/dev/null 2>&1; then
+  node_major=$(node -p 'process.versions.node.split(".")[0]' 2>/dev/null || echo 0)
+  if [ "${node_major:-0}" -ge 22 ] 2>/dev/null; then say node ok "$(node --version)"; node_ok=yes
+  else say node stop "found $(node --version 2>/dev/null); HyperFrames needs Node.js 22+. Do not replace the user's Node without asking"; fi
+else
+  say node missing "Node.js 22+ for HyperFrames"; add1 node
+fi
+if [ "$node_ok" = yes ] && command -v npx >/dev/null 2>&1 &&
+   hf_json=$(npx --no-install "hyperframes@$HYPERFRAMES_VERSION" skills check --json 2>/dev/null); then
+  hf_state=$(printf '%s' "$hf_json" | python3 -c '
+import json, sys
+try:
+    j = json.load(sys.stdin); s = j.get("summary", {})
+except Exception:
+    print("unknown"); sys.exit()
+if s.get("coreMissing", 0): print("missing %s" % j.get("location", ""))
+elif s.get("outdated", 0) or s.get("missing", 0): print("old %s outdated, %s not installed, in %s" % (s.get("outdated", 0), s.get("missing", 0), j.get("location", "")))
+else: print("ok %s" % j.get("location", ""))
+' 2>/dev/null)
+  case "$hf_state" in
+    ok*) say hyperframes-skills ok "${hf_state#ok }" ;;
+    old*) say hyperframes-skills old "${hf_state#old }; step 1 updates them"; add1 hyperframes-skills ;;
+    missing*) say hyperframes-skills missing "core skills not installed in ${hf_state#missing }"; add1 hyperframes-skills ;;
+    *) say hyperframes-skills info "could not read 'hyperframes skills check'"; add1 hyperframes-skills ;;
+  esac
+else
+  say hyperframes-skills missing "HyperFrames By HeyGen skills not checked yet (needs Node.js 22+ and the CLI)"; add1 hyperframes-skills
+fi
+
 # --- step 2: video-use ---------------------------------------------------------
 repo_report=$(inspect_repo "$VIDEO_USE_DIR" "$VIDEO_USE_ORIGIN" 2>&1)
 repo_result=$?
@@ -124,8 +153,13 @@ case "$repo_result" in
      if [ -d "$VIDEO_USE_DIR/.venv" ]; then say video-use-deps ok "$VIDEO_USE_DIR/.venv"
      else say video-use-deps missing "uv sync not run"; add2 video-use-deps; fi ;;
   2) say video-use missing "$VIDEO_USE_DIR"; add2 video-use ;;
+  3) say video-use dirty "$(printf '%s' "$repo_report" | tr '\n' ' '); step 2 backs up these changes (git stash + patch file) and updates to the official version"
+     add2 video-use-repair ;;
   *) say video-use stop "$(printf '%s' "$repo_report" | tr '\n' ' ')" ;;
 esac
+if [ "$repo_result" = 0 ] && ! grep -q -- '--no-subtitles' "$VIDEO_USE_DIR/helpers/render.py" 2>/dev/null; then
+  say video-use-version old "helpers/render.py has no --no-subtitles; step 2 updates to the official latest"; add2 video-use-repair
+fi
 
 for dir in "$HOME/.agents/skills" "$HOME/.codex/skills" "$HOME/.claude/skills"; do
   [ -d "$dir" ] || continue
@@ -174,14 +208,7 @@ else
   say elevenlabs-key missing "needed for word-level transcripts"; add2 elevenlabs-key
 fi
 
-# --- step 2: captions and CSS effects (HyperFrames; Node.js 22+, its own Chrome)
-if command -v node >/dev/null 2>&1; then
-  node_major=$(node -p 'process.versions.node.split(".")[0]' 2>/dev/null || echo 0)
-  if [ "${node_major:-0}" -ge 22 ] 2>/dev/null; then say node ok "$(node --version)"
-  else say node stop "found $(node --version 2>/dev/null); HyperFrames needs Node.js 22+. Do not replace the user's Node without asking"; fi
-else
-  say node missing "Node.js 22+ for HyperFrames captions and effects"; add2 node
-fi
+# --- step 2: captions and CSS effects (HyperFrames CLI pinned, its own Chrome)
 if command -v npx >/dev/null 2>&1 && npx --no-install "hyperframes@$HYPERFRAMES_VERSION" --version >/dev/null 2>&1; then
   say hyperframes ok "hyperframes@$HYPERFRAMES_VERSION cached"
   chrome=$(npx --no-install "hyperframes@$HYPERFRAMES_VERSION" browser path 2>/dev/null | tail -n 1)

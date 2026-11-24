@@ -13,8 +13,9 @@ step's work, checkpoint, and closing question.
 ## Before step 3
 
 Run the setup Skill's read-only `scripts/check_env.sh`. If `video-use`,
-`FFmpeg`, `ffprobe`, the Source Han Sans TW font, Node.js 22+, HyperFrames, the ElevenLabs key, the
-ElevenLabs MCP, or Agent Reach is missing or stopped, explain it in one plain
+`FFmpeg`, `ffprobe`, the Source Han Sans TW font, Node.js 22+, HyperFrames (skills or
+render CLI), the ElevenLabs key, the ElevenLabs MCP, or Agent Reach is missing,
+old, dirty, or stopped, explain it in one plain
 sentence and offer to go back to step 1 or 2 with `chatgpt-video-editing-setup`.
 Never install, clone, update, or repair anything from this Skill.
 
@@ -27,11 +28,11 @@ Never install, clone, update, or repair anything from this Skill.
    transcription and uses the user's ElevenLabs credits), then get word-level
    timestamps, write numbered paragraphs, and give a 4–8 sentence plain-language
    editing suggestion.
-5. **詢問是否刪減逐字稿**：ask which paragraphs to delete; only delete or
+5. **刪減逐字稿**：ask which paragraphs to delete; only delete or
    reorder, never rewrite what was said. The confirmed list is the approved
    strategy. Do not choose edit points or add B-roll, animation, music,
    effects, or CTA before this approval.
-6. **提供想參考的剪輯風格**：ask for one IG/TikTok/YouTube Shorts/X link, run
+6. **提供想參考的剪輯風格的短影音**：ask for one IG/TikTok/YouTube Shorts/X link, run
    `scripts/analyze_reference.sh`, look at the frames, and write a style recipe
    per [the style reference guide](references/style-reference.md). Offer a clean
    default if they have none.

@@ -33,14 +33,15 @@
       ]
     },
     {
-      "id": "dirty-repository-protection",
+      "id": "dirty-repository-backup-and-repair",
       "skill": "chatgpt-video-editing-setup",
-      "context": "~/Developer/video-use exists and git status has uncommitted changes.",
-      "prompt": "直接更新我的 video-use 環境。",
+      "context": "~/Developer/video-use has the official origin, a modified SKILL.md and helpers/render.py, an untracked uv.lock and tests/ folder, and a git-ignored .env.",
+      "prompt": "好，第 2 步全部幫我裝。",
       "expect": [
-        "reports the dirty repository condition",
-        "does not pull, reset, overwrite, or otherwise alter the repository",
-        "asks the user to choose how to proceed"
+        "lists the half-finished changes and says they will be backed up and video-use updated to the official version",
+        "saves a patch, a tar of new files, the status list, and a git stash with --include-untracked before running git pull --ff-only",
+        "never resets, deletes, or force-overwrites, and leaves the ignored .env untouched",
+        "tells the user where the backup is and that git stash pop restores it"
       ]
     },
     {
@@ -125,18 +126,29 @@
       "expect": [
         "recognizes the linked worktree with git rev-parse --is-inside-work-tree instead of checking for a .git directory",
         "captures origin, branch or detached state, commit, and status",
-        "reports the dirty status and stops before mutation"
+        "reports the dirty status and, after the one approval, backs the changes up before updating instead of skipping the repository"
       ]
     },
     {
       "id": "hyperframes-node-too-old",
       "skill": "chatgpt-video-editing-setup",
-      "context": "Step 2 dry run; node --version reports v20.19.0.",
-      "prompt": "好，第 2 步全部幫我裝。",
+      "context": "Step 1 dry run; node --version reports v20.19.0.",
+      "prompt": "好，第 1 步全部幫我裝。",
       "expect": [
         "parses the installed Node major version and requires Node 22 or newer for HyperFrames",
-        "installs the other step-2 items but reports HyperFrames as stopped, not ready",
+        "connects ElevenLabs and upgrades Agent Reach but reports the HyperFrames skills as stopped, not installed",
         "proposes an isolated version-manager approach as a separate question and does not replace the user's Node without approval"
+      ]
+    },
+    {
+      "id": "hyperframes-skills-install",
+      "skill": "chatgpt-video-editing-setup",
+      "context": "Node.js v22 is installed; 'npx -y hyperframes@0.9.86 skills check --json' reports coreMissing 2 and outdated 5. The user is in the Codex app.",
+      "prompt": "第 1 步，HyperFrames 也幫我裝好。",
+      "expect": [
+        "explains the Codex plugin route (外掛程式 → HyperFrames by HeyGen) or runs the pinned CLI, not both blindly",
+        "installs missing core skills with 'npx -y hyperframes@0.9.86 skills' and refreshes outdated ones with 'skills update'",
+        "reruns skills check and says a new chat may be needed to load the new skills"
       ]
     },
     {
@@ -165,10 +177,10 @@
     {
       "id": "guided-step-closing-question",
       "skill": "chatgpt-video-editing-setup",
-      "context": "Step 1 finished: Agent Reach 1.6 installed and the ElevenLabs MCP signed in.",
+      "context": "Step 1 finished: ElevenLabs MCP signed in, HyperFrames skills installed, Agent Reach 1.6 installed.",
       "prompt": "好了，登入完了。",
       "expect": [
-        "verifies the MCP connection and Agent Reach before saying step 1 is done",
+        "verifies the MCP connection, the HyperFrames skills (skills check) and Agent Reach before saying step 1 is done",
         "says the user is moving to step 2 of 7",
         "ends with exactly one friendly question asking whether to install the editing toolkit now"
       ]
@@ -190,7 +202,7 @@
       "context": "agent-reach version prints 'Agent Reach v1.5.0'.",
       "prompt": "Agent Reach 也幫我弄好。",
       "expect": [
-        "identifies 1.5 as an old version that needs the 1.6 upgrade",
+        "identifies 1.5 as an old version and upgrades it to 1.6+ in step 1 without stopping, keeping its keys and settings",
         "installs only from the official GitHub release URL with uv, never the PyPI package named agent-reach",
         "runs agent-reach setup and shows its installation report as is"
       ]

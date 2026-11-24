@@ -89,8 +89,8 @@ require_phrase "ffprobe"
 require_phrase "Pillow"
 require_phrase "HyperFrames"
 require_phrase "Source Han Sans TW"
-for step in "串接 ElevenLabs 和安裝 Agent Reach" "安裝 AI 剪輯工具包並完成下載配置" "放入想要剪輯的影片" \
-  "取得剪輯建議並用 ElevenLabs 拿到逐字稿" "詢問是否刪減逐字稿" "提供想參考的剪輯風格" "剪輯出品"; do
+for step in "串接 ElevenLabs 和 HyperFrames By HeyGen" "安裝 AI 剪輯工具包並完成下載配置" "放入想要剪輯的影片" \
+  "取得剪輯建議並用 ElevenLabs 拿到逐字稿" "刪減逐字稿" "提供想參考的剪輯風格的短影音" "剪輯出品"; do
   require_file_phrase "skills/chatgpt-short-video-editor/references/seven-step-guide.md" "$step"
 done
 require_phrase "逐段粗剪 → 轉色／圖卡／字幕 → 混音與完整預覽 → QA 與正式定稿"
@@ -112,6 +112,8 @@ for eval_id in \
   wrong-origin-hard-stop \
   linked-worktree-repository-inspection \
   hyperframes-node-too-old \
+  hyperframes-skills-install \
+  dirty-repository-backup-and-repair \
   linux-env-permission-verification \
   captions-one-line-eight-chars \
   css-effects-from-meaning; do
@@ -193,6 +195,17 @@ require_file_phrase "$INSTALL" 'https://github.com/Panniantong/Agent-Reach/relea
 require_file_phrase "$INSTALL" 'https://github.com/adobe-fonts/source-han-sans/raw/release/SubsetOTF/TW'
 require_file_phrase "$INSTALL" '[ "$magic" = 4f54544f ]'
 require_file_phrase "$INSTALL" 'DRY RUN: nothing will change.'
+# HyperFrames By HeyGen skills in step 1; repair (backup first) a dirty official video-use.
+require_file_phrase "$INSTALL" 'skills check --json'
+require_file_phrase "$INSTALL" 'skills update'
+require_file_phrase "$CHECK_ENV" 'skills check --json'
+for file in "$INSTALL" "$SETUP_RUNBOOK" "$FULL_PROMPT"; do
+  require_file_phrase "$file" 'stash push --include-untracked'
+  require_file_phrase "$file" 'pull --ff-only'
+  require_file_phrase "$file" 'video-use-backups'
+done
+reject_file_phrase "$INSTALL" 'git reset'
+reject_file_phrase "$INSTALL" 'not the clean official checkout'
 require_file_phrase "$KEYFILE" 'git -C "$repo" rev-parse --path-format=absolute --git-path info/exclude'
 require_file_phrase "$KEYFILE" '[ -f "$env_file" ] && [ ! -L "$env_file" ]'
 require_file_phrase "$KEYFILE" 'value not shown'
