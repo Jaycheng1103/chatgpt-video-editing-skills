@@ -1,52 +1,66 @@
 ---
 name: chatgpt-short-video-editor
-description: "Edit a user-supplied video into a vertical Reel, Short, TikTok, video diary short, or an approved eight-step AI short-video workflow. Use when the user provides or points to media and asks to transcribe, cut, subtitle, preview, or export a vertical short. Do not use for environment-only setup or generic Premiere Pro or CapCut help."
+description: "Guide a user through steps 3–7 of the seven-step AI short-video workflow: take their video, transcribe it with ElevenLabs Scribe v2, suggest an edit, ask which transcript parts to delete, study a reference short (Instagram, TikTok, YouTube Shorts, X) for style, then cut a vertical Reel/Short/TikTok with subtitles, a 720p preview, and a verified 1080×1920 final. Use when the user provides or points to a video, or asks to transcribe, cut, subtitle, preview, or export a vertical short, or to edit 'in the style of' a short-video link. Do not use for environment-only setup or generic Premiere Pro or CapCut help."
 ---
 
-# ChatGPT Short-video Editor
+# ChatGPT Short-video Editor（第 3–7 步）
 
-Create a safe, evidence-backed vertical short from user-provided media. This
-Skill starts only when a source file or clear source location is available.
+Lead the user through the rest of the seven steps with one friendly question
+at a time, until a verified final video exists. Read
+[the seven-step guide](references/seven-step-guide.md) first; it has each
+step's work, checkpoint, and closing question.
 
-## Boundary and prerequisites
+## Before step 3
 
-1. Inspect the source with `ffprobe`; never overwrite, move, rename, or delete
-   it. Put every new artifact beside the source in `<source-directory>/edit/`.
-2. Check that the installed `video-use` workflow, `FFmpeg`, `ffprobe`, and
-   ElevenLabs Scribe v2 are available for the documented full-precision path.
-   Do not install, clone, update, or repair anything silently. If a dependency
-   is missing, hand off to `chatgpt-video-editing-setup` and state what must be
-   verified first.
-3. Before the first upload of a source file to ElevenLabs, name the file, say it
-   is for ElevenLabs Scribe v2 transcription, mention possible quota or cost,
-   and wait for explicit consent. Do not upload before that consent.
-4. Read [the eight-step workflow](references/eight-step-workflow.md), then
-   [the production rules](references/production-rules.md), before editing.
+Run the setup Skill's read-only `scripts/check_env.sh`. If `video-use`,
+`FFmpeg`, `ffprobe`, the Source Han Sans TW font, the ElevenLabs key, the
+ElevenLabs MCP, or Agent Reach is missing or stopped, explain it in one plain
+sentence and offer to go back to step 1 or 2 with `chatgpt-video-editing-setup`.
+Never install, clone, update, or repair anything from this Skill.
 
-## Required sequence
+## The five steps
 
-Follow these eight steps exactly: 素材檢查、逐字轉寫、內容整理、剪輯決策、逐段粗剪、轉色／圖卡／字幕、混音與完整預覽、QA 與正式定稿.
+3. **放入想要剪輯的影片**：inspect with `ffprobe`, keep the original untouched,
+   put every new file in `<source-directory>/edit/`.
+4. **取得剪輯建議並用 ElevenLabs 拿到逐字稿**：ask before the first upload of
+   this file (name the file, say it goes to ElevenLabs Scribe v2 for
+   transcription and uses the user's ElevenLabs credits), then get word-level
+   timestamps, write numbered paragraphs, and give a 4–8 sentence plain-language
+   editing suggestion.
+5. **詢問是否刪減逐字稿**：ask which paragraphs to delete; only delete or
+   reorder, never rewrite what was said. The confirmed list is the approved
+   strategy. Do not choose edit points or add B-roll, animation, music,
+   effects, or CTA before this approval.
+6. **提供想參考的剪輯風格**：ask for one IG/TikTok/YouTube Shorts/X link, run
+   `scripts/analyze_reference.sh`, look at the frames, and write a style recipe
+   per [the style reference guide](references/style-reference.md). Offer a clean
+   default if they have none.
+7. **剪輯出品**：逐段粗剪 → 轉色／圖卡／字幕 → 混音與完整預覽 → QA 與正式定稿, following
+   [the production rules](references/production-rules.md). Render a complete
+   720p preview, ask for approval, then render and verify the 1080×1920 final.
 
-After the first three steps, propose a 4–8 sentence, plain-language editing
-strategy and wait for approval. Until approval, do not choose edit points or
-add B-roll, animations, music, effects, CTA, or a publishing schedule. Treat
-these as opt-in creative decisions, not defaults.
+## Conversation rules
+
+- Traditional Chinese, warm and plain. Tell the user which step they are on.
+- One question per message, recommended answer first, and every step ends with
+  the question that opens the next step.
+- If the user goes off-path (asks for a different length, swaps the video,
+  skips the reference), adjust and tell them which step you are now on.
+- Do not upload without consent, and do not claim a transcript, preview, QA
+  pass, or final exists until you have produced and checked it.
+
+## Edit-quality rules (unchanged)
 
 Use word-level verbatim timestamps, cached per unchanged source. Never cut
-inside a word. Keep 30–200ms padding around cut edges, work per segment, and
-use output-timeline subtitle timing. Subtitles are the last visual operation.
+inside a word. Keep 30–200ms padding around cut edges with about 30ms audio
+fades, work per segment, and time subtitles on the output timeline.
+Subtitles are the last visual operation. Make at most three evidence-based
+self-fix passes on the preview. If the user declines cloud upload, offer the
+lower-confidence local Whisper fallback only as an explicit choice.
 
-Render a complete 720p preview first. Inspect the rendered preview, not only
-the source; make no more than three evidence-based self-fix passes. After the
-preview is approved, render the 1080×1920 final and verify that final file
-before delivery. Never say a transcript, preview, QA pass, or final is
-complete without the corresponding verified output.
+## Delivery
 
-## Handoff and delivery
-
-If the requested operation exceeds this workflow, explain the safe stopping
-point. For environment gaps, use `chatgpt-video-editing-setup`; it must obtain
-approval before mutations and does not begin creative work.
-
-Keep and report the artifacts defined in [the output contract](references/output-contract.md).
-Present only one formal final outwardly, with its evidence-backed QA report.
+Keep and report the artifacts in [the output contract](references/output-contract.md),
+including `edit/style/style-recipe.md` when a reference was used. Present one
+formal final with its evidence-backed QA report, then ask whether to cut the
+next video in the same style.

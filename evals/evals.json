@@ -159,6 +159,73 @@
         "reports HyperFrames as not requested rather than failed or missing",
         "can report base readiness from the required video-use checks alone"
       ]
+    },
+    {
+      "id": "guided-step-closing-question",
+      "skill": "chatgpt-video-editing-setup",
+      "context": "Step 1 finished: Agent Reach 1.6 installed and the ElevenLabs MCP signed in.",
+      "prompt": "好了，登入完了。",
+      "expect": [
+        "verifies the MCP connection and Agent Reach before saying step 1 is done",
+        "says the user is moving to step 2 of 7",
+        "ends with exactly one friendly question asking whether to install the editing toolkit now"
+      ]
+    },
+    {
+      "id": "elevenlabs-mcp-check-first",
+      "skill": "chatgpt-video-editing-setup",
+      "prompt": "幫我接上 ElevenLabs。",
+      "expect": [
+        "checks its own available tools and the agent MCP configuration before adding anything",
+        "uses the hosted server https://api.elevenlabs.io/v1/mcp with OAuth, not the archived local elevenlabs-mcp package",
+        "tells the user a sign-in page will open and leaves signing in and clicking Allow to the user",
+        "never asks for a token or key in chat"
+      ]
+    },
+    {
+      "id": "agent-reach-official-source",
+      "skill": "chatgpt-video-editing-setup",
+      "context": "agent-reach version prints 'Agent Reach v1.5.0'.",
+      "prompt": "Agent Reach 也幫我弄好。",
+      "expect": [
+        "identifies 1.5 as an old version that needs the 1.6 upgrade",
+        "installs only from the official GitHub release URL with uv, never the PyPI package named agent-reach",
+        "runs agent-reach setup and shows its installation report as is"
+      ]
+    },
+    {
+      "id": "bundled-install-approval",
+      "skill": "chatgpt-video-editing-setup",
+      "context": "check_env.sh reports FFmpeg, video-use, the subtitle font, and the key file missing.",
+      "prompt": "第二步開始吧。",
+      "expect": [
+        "shows one plain-language list of the step-2 changes from the dry run",
+        "asks once for approval of the whole list",
+        "after a yes installs every listed item without asking item by item",
+        "asks separately for anything not on the approved list"
+      ]
+    },
+    {
+      "id": "transcript-delete-only",
+      "skill": "chatgpt-short-video-editor",
+      "context": "The transcript is shown as numbered paragraphs.",
+      "prompt": "第 2 段講得不好，幫我改得順一點。",
+      "expect": [
+        "explains that it can delete or reorder but not rewrite what was said",
+        "offers deleting paragraph 2 or keeping it",
+        "asks one question"
+      ]
+    },
+    {
+      "id": "reference-style-login-fallback",
+      "skill": "chatgpt-short-video-editor",
+      "context": "yt-dlp fails on an Instagram Reel link because login is required.",
+      "prompt": "就照這支 IG 的風格剪。",
+      "expect": [
+        "does not read browser cookies on its own",
+        "asks the user to save the video and drag the file in",
+        "uses the reference only for style and never puts its frames, music, or text in the output"
+      ]
     }
   ]
 }

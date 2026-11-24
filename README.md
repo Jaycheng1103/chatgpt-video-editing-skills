@@ -1,21 +1,31 @@
 # ChatGPT 剪短影音 Skills
 
-一組給可操作本機檔案與終端機的 AI Agent 使用的繁體中文 Skills，協助你安全地準備剪輯環境，並把自己提供的影片製作成直式短影音。
+一組給可操作本機檔案與終端機的 AI Agent（Codex／ChatGPT、Claude Code 等）使用的繁體中文 Skills。裝好之後，你只要跟著 Agent 的問題一步一步回答，就能把自己拍的影片剪成直式短影音：它會自動檢查電腦、幫你裝好需要的工具、串接 ElevenLabs、裝好 Agent Reach，再陪你從放影片走到正式成片。
 
-這個套件把「環境安裝／檢查」和「實際剪輯」拆成兩個 Skill。它會保護原始素材、在付費或上傳前取得同意，並以實際輸出與 QA 證據為準，不把計畫、指令或未驗證的檔案說成完成品。
+它會保護原始素材、上傳前先問你、不印出金鑰，並以實際輸出與 QA 證據為準，不把計畫或沒驗證的檔案說成完成品。
 
-![ChatGPT 剪短影音的八大步驟](assets/ChatGPT剪短影音的八大步驟.png)
+## 七步驟
+
+| 步驟 | 你會做什麼 | Agent 會做什麼 |
+| --- | --- | --- |
+| 1. 串接 ElevenLabs 和安裝 Agent Reach | 在跳出的 ElevenLabs 登入頁按「允許」 | 自動檢查環境，裝好或升級 Agent Reach，把 ElevenLabs 官方雲端 MCP 加到你的 Agent |
+| 2. 安裝 AI 剪輯工具包並完成下載配置 | 說一次「好」，再把 API 金鑰貼進它幫你打開的檔案 | 一次裝好 FFmpeg、video-use、思源黑體字幕字體，並建立受保護的金鑰檔 |
+| 3. 放入想要剪輯的影片 | 把影片拖進來 | 檢查影片規格，原檔不動，在旁邊建立 `edit/` |
+| 4. 取得剪輯建議並用 ElevenLabs 拿到逐字稿 | 同意上傳 | 用 ElevenLabs Scribe v2 轉出逐字時間碼，整理成編號段落，給你 4–8 句剪輯建議 |
+| 5. 詢問是否刪減逐字稿 | 說要刪哪幾段 | 只刪減與換位置，不改你說過的話 |
+| 6. 提供想參考的剪輯風格 | 貼一支 IG、TikTok、YouTube Shorts 或 X 的短影音連結 | 下載並量測節奏、看字幕樣式，寫成「風格配方」 |
+| 7. 剪輯出品 | 看 720p 預覽，說「可以」或要改哪裡 | 粗剪、字幕、混音、預覽 QA，核准後輸出並驗證 1080×1920 正式檔 |
+
+每一步結束，Agent 都會用一個問題帶你進下一步。
 
 ## 兩個 Skills 的分工
 
-| Skill | 用途 | 不會做的事 |
+| Skill | 負責 | 不會做的事 |
 | --- | --- | --- |
-| [`chatgpt-video-editing-setup`](skills/chatgpt-video-editing-setup/SKILL.md) | 檢查、安裝、修復或驗證 video-use、FFmpeg、ffprobe、思源黑體 TW 字幕字體、ElevenLabs 憑證與選用的 HyperFrames 環境 | 不上傳素材、不轉寫、不剪輯、不輸出影片 |
-| [`chatgpt-short-video-editor`](skills/chatgpt-short-video-editor/SKILL.md) | 對使用者提供的影片執行逐字轉寫、剪輯策略、粗剪、字幕、預覽、QA 與正式輸出 | 不會靜默安裝工具，也不會在預覽核准前輸出正式定稿 |
+| [`chatgpt-video-editing-setup`](skills/chatgpt-video-editing-setup/SKILL.md) | 第 1–2 步：自動檢查（`scripts/check_env.sh`）、一次核准後安裝（`scripts/install_missing.sh`）、ElevenLabs MCP 串接、Agent Reach、video-use、FFmpeg、思源黑體 TW、金鑰檔（`scripts/prepare_key_file.sh`） | 不上傳素材、不轉寫、不剪輯 |
+| [`chatgpt-short-video-editor`](skills/chatgpt-short-video-editor/SKILL.md) | 第 3–7 步：素材檢查、逐字稿、剪輯建議、刪減、參考風格分析（`scripts/analyze_reference.sh`）、粗剪、字幕、預覽、QA 與正式輸出 | 不自己安裝或修環境；缺東西時帶你回第 1–2 步 |
 
 ## 安裝
-
-### 快速安裝（互動式，建議）
 
 在你的專案目錄執行：
 
@@ -23,100 +33,52 @@
 npx skills add Jaycheng1103/chatgpt-video-editing-skills --full-depth
 ```
 
-安裝器會讓你選擇要安裝的 Skills 與偵測到的 Agent。
-
-若你確定要一次選取這個 Repo 內的所有 Skills，並安裝到所有偵測到的 Agent，可執行：
+安裝器會讓你選擇要安裝的 Skills 與偵測到的 Agent。若確定要一次選取全部 Skills 並安裝到所有偵測到的 Agent：
 
 ```sh
 npx skills add Jaycheng1103/chatgpt-video-editing-skills --all --full-depth
 ```
 
-`--all` 會同時選取「全部 Skills」與「全部偵測到的 Agent」，請先確認這正是你想要的範圍。
+手動複製時，每個 Skill 都要連同 `references/` 與 `scripts/` 一起保留，不能只複製 `SKILL.md`。
 
-### 只安裝單一 Skill
-
-只安裝環境設定 Skill：
-
-```sh
-npx skills add Jaycheng1103/chatgpt-video-editing-skills --skill chatgpt-video-editing-setup --full-depth
-```
-
-只安裝剪輯 Skill：
-
-```sh
-npx skills add Jaycheng1103/chatgpt-video-editing-skills --skill chatgpt-short-video-editor --full-depth
-```
-
-### 手動 Clone 後從本機安裝
-
-```sh
-git clone https://github.com/Jaycheng1103/chatgpt-video-editing-skills.git
-cd chatgpt-video-editing-skills
-npx skills add . --full-depth
-```
-
-這種方式適合先閱讀內容、再從本機路徑安裝。若要手動複製 Skill，必須連同各自的 `references/` 一起保留，不能只複製 `SKILL.md`。
-
-### 更新與移除
-
-更新已安裝的兩個 Skills：
+更新與移除：
 
 ```sh
 npx skills update chatgpt-video-editing-setup chatgpt-short-video-editor
-```
-
-互動式移除：
-
-```sh
 npx skills remove chatgpt-video-editing-setup chatgpt-short-video-editor
 ```
 
-若你安裝在全域範圍，更新或移除時請加上 `--global`。你也可以先用 `npx skills list` 確認目前專案範圍的安裝狀態。
+全域安裝時請加上 `--global`。
+
+## 開始使用
+
+裝好後，對 Agent 說一句就好：
+
+> 請用 `chatgpt-video-editing-setup` 帶我開始剪短影音。
+
+它會先自動檢查你的電腦（不改任何東西），告訴你缺什麼，問你一次要不要裝，然後一路帶你走到第 7 步。已經設定好的人可以直接說：
+
+> 請用 `chatgpt-short-video-editor` 幫我剪這支影片：`/完整/路徑/原始影片.mov`
+
+想一次給完整規格，可以複製 [`examples/完整提示詞.md`](examples/完整提示詞.md)。
 
 ## 前置需求
 
-- 能讀寫本機檔案並執行終端機指令的相容 Agent。
-- Git、Python 與 [uv](https://docs.astral.sh/uv/)；實際需求仍以 video-use 當下版本的官方文件為準。
-- [FFmpeg](https://ffmpeg.org/) 與 `ffprobe`。
-- [video-use](https://github.com/browser-use/video-use) 完整 Repo；剪輯輔助程式位於其中，不能只保留一份 Skill 文件。
-- [思源黑體（Source Han Sans）](https://github.com/adobe-fonts/source-han-sans) TW 子集 OTF（Regular 與 Bold），供繁體中文字幕燒錄使用；採 SIL Open Font License 1.1 授權，Setup Skill 只從官方 Repo 的 `release` 分支下載。
-- [ElevenLabs Scribe v2](https://elevenlabs.io/docs/capabilities/speech-to-text) 憑證與可用額度，供完整精度流程取得 word-level 時間碼。
-- [Pillow](https://python-pillow.github.io/) 用於簡單靜態資訊卡。
-- [HyperFrames](https://github.com/heygen-com/hyperframes) 僅在已核准的策略需要 HTML、CSS 或 GSAP 動畫時才是選用需求；若選用，必須有 Node.js 22 或更新版本與 Bun。未選用時，不要求 Node.js、HyperFrames Repo、`bun.lock` 或其 Core Skills。
+- 能讀寫本機檔案並執行終端機指令的 Agent。
+- macOS 或 Linux。缺 FFmpeg 時，macOS 用 Homebrew 安裝；沒有 Homebrew 或 Linux 需要 `sudo` 時，Agent 會給你指令請你自己在終端機輸入密碼。
+- [ElevenLabs](https://elevenlabs.io) 帳號：官方雲端 MCP（`https://api.elevenlabs.io/v1/mcp`，用 OAuth 登入）負責串接帳號；逐字稿用 [Scribe v2](https://elevenlabs.io/docs/capabilities/speech-to-text) API 金鑰取得每個字的時間碼。兩者都會用到你帳號的額度，免費帳號每月額度有限，實際額度以 ElevenLabs 後台為準。
+- 其餘由第 1–2 步自動安裝：[uv](https://docs.astral.sh/uv/)、[Agent Reach](https://github.com/Panniantong/Agent-Reach)（只從官方 GitHub release 安裝，不用 PyPI 上同名套件）、[video-use](https://github.com/browser-use/video-use) 完整 Repo、[FFmpeg](https://ffmpeg.org/) 與 `ffprobe`、[思源黑體（Source Han Sans）](https://github.com/adobe-fonts/source-han-sans) TW 子集 OTF（SIL Open Font License 1.1）、[Pillow](https://python-pillow.github.io/)。
+- [HyperFrames](https://github.com/heygen-com/hyperframes) 只有在你要 HTML、CSS 或 GSAP 動畫時才安裝，需要 Node.js 22 或更新版本與 Bun。
 
-缺少工具時，剪輯 Skill 會停在安全位置，說明缺口並交給 Setup Skill 檢查。它不會自行 Clone、更新、安裝套件或改動你的 Skills 目錄。
-
-## 第一次使用
-
-先檢查環境：
-
-> 請使用 `chatgpt-video-editing-setup` 檢查我的短影音剪輯環境。先只做檢查並列出需要的變更，等我確認後再安裝；不要上傳或轉寫任何媒體。
-
-環境通過後開始剪輯：
-
-> 請使用 `chatgpt-short-video-editor`，把 `/完整/路徑/原始影片.mov` 剪成 60–90 秒、9:16 的繁體中文 Reels。先完成素材檢查、逐字轉寫與內容整理，再用 4–8 句提出剪輯策略，等我確認後才開始剪。
-
-若想一次提供完整規格，可直接複製 [`examples/完整提示詞.md`](examples/完整提示詞.md)。
-
-## 八大步驟
-
-1. 素材檢查：用 `ffprobe` 確認來源規格與可解碼性，原始影片保持不變。
-2. 逐字轉寫：先取得檔案層級的上傳同意，再以 ElevenLabs Scribe v2 取得 word-level 時間碼。
-3. 內容整理：找出 Hook、核心主線、可刪內容與待確認資訊。
-4. 剪輯決策：先提出 4–8 句白話策略，取得核准後才決定剪接點與創意元素。
-5. 逐段粗剪：依完整字詞邊界建立 EDL，保留 30–200ms 邊界空間與約 30ms 音訊淡入淡出。
-6. 轉色／圖卡／字幕：只有技術上必要或已核准時才調色；靜態圖卡用 Pillow，選用動畫才用 HyperFrames，字幕以思源黑體 TW 最後合成。
-7. 混音與完整預覽：先輸出並檢查一支完整 720p 預覽。
-8. QA 與正式定稿：預覽獲得明確核准後才輸出 1080×1920 正式檔；正式檔仍需獨立檢查與完整解碼，通過後才交付。
-
-完整規則見 [`eight-step-workflow.md`](skills/chatgpt-short-video-editor/references/eight-step-workflow.md) 與 [`production-rules.md`](skills/chatgpt-short-video-editor/references/production-rules.md)。
+自動安裝不會越過這些安全底線：既有 video-use 有未提交修改或來源不是官方 Repo 時會停下；既有字體檔、Skill 連結不覆寫；金鑰只由你自己貼進檔案。
 
 ## 隱私、憑證與費用
 
 - 不要把 API Key 貼進聊天、命令列參數、公開檔案、Git commit、shell history 或 log。
 - `ELEVENLABS_API_KEY` 只能由本機環境變數，或受保護的 `~/Developer/video-use/.env` 提供。
 - 使用 `.env` 前，Agent 必須先確認 Git 會忽略它；本機檔案權限應為 `600`。Agent 不應讀取或顯示檔案內容。
-- 第一次把媒體傳給 ElevenLabs 前，Agent 必須說明具體檔名、用途是 Scribe v2 轉寫，以及可能消耗額度或產生費用，並等待你的明確同意。
+- 第一次把媒體傳給 ElevenLabs 前，Agent 必須說明具體檔名、用途是 Scribe v2 轉寫，以及會用到你帳號的額度，並等待你的明確同意。
+- ElevenLabs MCP 用 OAuth 登入：你在官方頁面登入並按允許，Agent 不經手密碼或權杖。
 - 若你不願上傳雲端，可明確選擇本機 Whisper 降級方案；它的時間碼信心較低，需要對每個剪接邊界做額外播放檢查，不能說成與 Scribe v2 同等精準。
 
 詳細安全規則見 [`security-and-verification.md`](skills/chatgpt-video-editing-setup/references/security-and-verification.md)。
@@ -131,6 +93,8 @@ edit/
 ├── transcripts/<source>.json
 ├── corrected-transcript.md
 ├── edl.json
+├── style/style-recipe.md
+├── reference/
 ├── master.srt
 ├── clips/
 ├── animations/slot_<id>/
@@ -143,9 +107,13 @@ edit/
 
 ## 常見問題
 
-### Agent 說找不到 FFmpeg、ffprobe、video-use、字幕字體或憑證
+### Agent 說找不到 FFmpeg、ffprobe、video-use、字幕字體、憑證或 ElevenLabs
 
-請改用 `chatgpt-video-editing-setup`。它會先檢查，再列出需要你核准的變更。若既有 Repo 有未提交修改，它會停下來，不會直接 pull、reset 或覆寫；既有字體檔也不會被重新下載或覆寫。
+請改用 `chatgpt-video-editing-setup`。它會自動檢查、列出要裝的東西，你說一次「好」就一起裝完。若既有 Repo 有未提交修改，它會停下來，不會直接 pull、reset 或覆寫；既有字體檔也不會被重新下載或覆寫。
+
+### 參考影片抓不下來
+
+Instagram 和 X 常常要登入才能下載。Agent 會請你把影片存下來直接拖進來，不會自己去讀你瀏覽器的登入資料。參考影片只用來研究節奏和字幕樣式，不會放進成片。
 
 ### 沒有 ElevenLabs 額度，或不想上傳素材
 
@@ -157,7 +125,7 @@ edit/
 
 ### 想加動畫、B-roll、音樂或 CTA
 
-請在剪輯策略階段提出或核准。這些都是 opt-in 創意決策，不是預設自動加入。簡單靜態圖卡優先使用 Pillow；只有已核准的 HTML、CSS 或 GSAP 動畫才需要 HyperFrames。
+請在第 5–6 步提出或核准。這些都是 opt-in 創意決策，不是預設自動加入。簡單靜態圖卡優先使用 Pillow；只有已核准的 HTML、CSS 或 GSAP 動畫才需要 HyperFrames。
 
 ## 第三方、授權與聲明
 
@@ -165,4 +133,4 @@ edit/
 
 本專案以 [MIT License](LICENSE) 發布。歡迎先閱讀 [`CONTRIBUTING.md`](CONTRIBUTING.md) 與 [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) 再參與貢獻。
 
-這是社群維護的非官方專案，與 OpenAI、ChatGPT、video-use、HyperFrames、ElevenLabs、FFmpeg、Pillow 或 Adobe 的開發者及所屬公司沒有從屬、授權、背書或合作關係。產品名稱與商標屬各自權利人所有。
+這是社群維護的非官方專案，與 OpenAI、ChatGPT、video-use、HyperFrames、ElevenLabs、FFmpeg、Pillow、Agent Reach 或 Adobe 的開發者及所屬公司沒有從屬、授權、背書或合作關係。產品名稱與商標屬各自權利人所有。

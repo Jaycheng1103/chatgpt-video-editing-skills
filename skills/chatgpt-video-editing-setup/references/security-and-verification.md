@@ -7,9 +7,11 @@ Use `ELEVENLABS_API_KEY` only from the process environment or from
 transcript, command-line argument, public file, commit message, shell history,
 or log. Never print a key or a redacted-looking substitute.
 
-If the key is absent, say that setup cannot complete the credential check. Ask
-for approval to prepare local secret storage, then verify that `.env` is ignored
-*before* asking the user to write anything. Prefer an environment variable when
+If the key is absent, say that setup cannot complete the credential check.
+Preparing local secret storage is an item on the step-2 approval list;
+`scripts/prepare_key_file.sh --open` verifies that `.env` is ignored *before*
+asking the user to write anything, creates it empty with mode 600, and opens it
+for the user. `--verify` reports presence only. Prefer an environment variable when
 that is practical. For an approved local file, first run:
 
 ```sh

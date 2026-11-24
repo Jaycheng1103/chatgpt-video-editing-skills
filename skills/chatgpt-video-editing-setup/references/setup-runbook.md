@@ -1,7 +1,10 @@
 # Setup runbook
 
-Use this runbook only after the setup Skill has inspected the machine and the
-user has approved the listed mutations. Re-read the upstream documentation at
+`scripts/check_env.sh` (read-only) and `scripts/install_missing.sh` (dry run by
+default, `--yes` after one approval of the listed changes) automate this
+runbook; this file documents the sources and hard stops they enforce. The user
+approves the step's whole list once; anything discovered later that is not on
+that list needs its own question. Re-read the upstream documentation at
 execution time because install instructions can change.
 
 ## 1. Inspect and propose

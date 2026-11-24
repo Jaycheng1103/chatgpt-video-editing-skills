@@ -7,8 +7,10 @@ work files in the source repository or alter the original media.
 edit/
 ├── project.md
 ├── transcripts/<source>.json
-├── corrected-transcript.md
+├── corrected-transcript.md         # numbered paragraphs used in steps 4–5
 ├── edl.json
+├── style/style-recipe.md            # step 6 recipe (or the clean default)
+├── reference/                      # step 6 reference video, frames, analysis (never used in output)
 ├── master.srt
 ├── clips/                         # retained per-segment work when produced
 ├── animations/slot_<id>/          # source and output when animation is used

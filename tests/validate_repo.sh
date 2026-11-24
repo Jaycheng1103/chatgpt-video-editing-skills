@@ -21,11 +21,16 @@ require_file "skills/chatgpt-video-editing-setup/SKILL.md"
 require_file "skills/chatgpt-video-editing-setup/references/setup-runbook.md"
 require_file "skills/chatgpt-video-editing-setup/references/security-and-verification.md"
 require_file "skills/chatgpt-short-video-editor/SKILL.md"
-require_file "skills/chatgpt-short-video-editor/references/eight-step-workflow.md"
+require_file "skills/chatgpt-short-video-editor/references/seven-step-guide.md"
+require_file "skills/chatgpt-short-video-editor/references/style-reference.md"
+require_file "skills/chatgpt-short-video-editor/scripts/analyze_reference.sh"
+require_file "skills/chatgpt-video-editing-setup/references/elevenlabs-mcp.md"
+require_file "skills/chatgpt-video-editing-setup/scripts/check_env.sh"
+require_file "skills/chatgpt-video-editing-setup/scripts/install_missing.sh"
+require_file "skills/chatgpt-video-editing-setup/scripts/prepare_key_file.sh"
 require_file "skills/chatgpt-short-video-editor/references/production-rules.md"
 require_file "skills/chatgpt-short-video-editor/references/output-contract.md"
 require_file "examples/完整提示詞.md"
-require_file "assets/ChatGPT剪短影音的八大步驟.png"
 require_file "LICENSE"
 
 # Inspect every public text-like file, including tests and evals. Only local
@@ -84,7 +89,11 @@ require_phrase "ffprobe"
 require_phrase "Pillow"
 require_phrase "HyperFrames"
 require_phrase "Source Han Sans TW"
-require_phrase "素材檢查、逐字轉寫、內容整理、剪輯決策、逐段粗剪、轉色／圖卡／字幕、混音與完整預覽、QA 與正式定稿"
+for step in "串接 ElevenLabs 和安裝 Agent Reach" "安裝 AI 剪輯工具包並完成下載配置" "放入想要剪輯的影片" \
+  "取得剪輯建議並用 ElevenLabs 拿到逐字稿" "詢問是否刪減逐字稿" "提供想參考的剪輯風格" "剪輯出品"; do
+  require_file_phrase "skills/chatgpt-short-video-editor/references/seven-step-guide.md" "$step"
+done
+require_phrase "逐段粗剪 → 轉色／圖卡／字幕 → 混音與完整預覽 → QA 與正式定稿"
 require_phrase "30–200ms"
 require_phrase "30ms"
 require_phrase "720p"
@@ -159,5 +168,30 @@ while IFS= read -r file; do
 done <<EOF
 $TEXT_FILES
 EOF
+
+# Guided-setup contracts: automation scripts, hosted ElevenLabs MCP, official
+# Agent Reach source, and the never-print-a-key rule.
+CHECK_ENV="skills/chatgpt-video-editing-setup/scripts/check_env.sh"
+INSTALL="skills/chatgpt-video-editing-setup/scripts/install_missing.sh"
+KEYFILE="skills/chatgpt-video-editing-setup/scripts/prepare_key_file.sh"
+for file in "$CHECK_ENV" "$INSTALL"; do
+  require_file_phrase "$file" 'git -C "$repo" rev-parse --is-inside-work-tree'
+  require_file_phrase "$file" '[ "$actual_origin" = "$expected_origin" ] ||'
+  require_file_phrase "$file" 'https://github.com/browser-use/video-use.git'
+  require_file_phrase "$file" 'https://api.elevenlabs.io/v1/mcp'
+done
+require_file_phrase "$INSTALL" 'https://github.com/Panniantong/Agent-Reach/releases/latest/download/agent-reach.zip'
+require_file_phrase "$INSTALL" 'https://github.com/adobe-fonts/source-han-sans/raw/release/SubsetOTF/TW'
+require_file_phrase "$INSTALL" '[ "$magic" = 4f54544f ]'
+require_file_phrase "$INSTALL" 'DRY RUN: nothing will change.'
+require_file_phrase "$KEYFILE" 'git -C "$repo" rev-parse --path-format=absolute --git-path info/exclude'
+require_file_phrase "$KEYFILE" '[ -f "$env_file" ] && [ ! -L "$env_file" ]'
+require_file_phrase "$KEYFILE" 'value not shown'
+require_file_phrase "skills/chatgpt-video-editing-setup/references/elevenlabs-mcp.md" 'codex mcp login elevenlabs'
+require_file_phrase "skills/chatgpt-video-editing-setup/SKILL.md" 'never the PyPI'
+require_file_phrase "skills/chatgpt-short-video-editor/references/style-reference.md" 'do not pull cookies'
+for script in "$CHECK_ENV" "$INSTALL" "$KEYFILE" "skills/chatgpt-short-video-editor/scripts/analyze_reference.sh"; do
+  sh -n "$script" || fail "shell syntax error: $script"
+done
 
 printf '%s\n' "Repository contract checks passed."
