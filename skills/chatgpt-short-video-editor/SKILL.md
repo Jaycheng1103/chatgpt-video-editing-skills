@@ -27,7 +27,7 @@ Never install, clone, update, or repair anything from this Skill.
    this file (name the file, say it goes to ElevenLabs Scribe v2 for
    transcription and uses the user's ElevenLabs credits), then get word-level
    timestamps, write numbered paragraphs labelled with the five script parts
-   (鉤子、情境、挑戰、行動、收穫), and give a 4–8 sentence plain-language
+   (鉤子、背景、挑戰、行動、收穫), and give a 4–8 sentence plain-language
    editing suggestion.
 5. **刪減逐字稿**：ask which paragraphs to delete; only delete or
    reorder, never rewrite what was said. The confirmed list is the approved
