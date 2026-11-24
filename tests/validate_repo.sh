@@ -141,6 +141,9 @@ require_file_phrase "$FULL_PROMPT" '每行最多 8 個字'
 CAPTIONS_REF="skills/chatgpt-short-video-editor/references/captions-and-effects.md"
 require_file_phrase "$CAPTIONS_REF" '每行最多 8 個字'
 require_file_phrase "$CAPTIONS_REF" '--no-subtitles'
+# Step 4 labels the transcript with the same five parts as the script Skill.
+require_file_phrase "skills/chatgpt-short-video-editor/references/seven-step-guide.md" '鉤子、背景、挑戰、行動、收穫'
+require_file_phrase "$FULL_PROMPT" '鉤子（為什麼我該在意，含憑什麼那句）、背景、挑戰、行動、收穫'
 for script in build_captions.py build_effects.py compose_video.py; do
   test -f "skills/chatgpt-short-video-editor/scripts/$script" || fail "missing script: $script"
   python3 -c 'import ast, sys; ast.parse(open(sys.argv[1], encoding="utf-8").read())' \

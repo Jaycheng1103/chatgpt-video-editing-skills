@@ -64,6 +64,9 @@ Density and placement:
 - No emoji, stickers, sound effects, or music unless the user asked for them.
 - If the user chose a reference style in step 6, take the accent colour,
   highlight habit and effect density from the style recipe.
+- When the transcript is labelled with the five script parts, good default
+  moments are a `keyword` on the number in the 鉤子's 憑什麼 line, `step` or
+  `list` inside 行動, and a `punch` on the 收穫 takeaway line.
 
 ## QA additions
 
