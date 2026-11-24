@@ -98,12 +98,11 @@ Report observations, not assumptions:
 | subtitle font | `SourceHanSansTW-Regular.otf` and `SourceHanSansTW-Bold.otf` present as regular files in the platform font directory, `OTTO` magic verified, and the `fc-list` match where fontconfig exists |
 | video-use registration | agent Skills path and symlink target, if one was approved |
 | credential | source present and `.env` mode/ignore check, without value |
-| HyperFrames, if explicitly approved and installed | stable path, exact official origin URL, clean status, Node.js 22+, lockfile, installed Core Skills outcome |
+| captions and CSS effects | Node.js 22+, `hyperframes@0.9.86` runs from the npx cache, its render browser path exists, FFmpeg lists the `libvpx-vp9` decoder |
 | no-cost boundary | confirmation that no media was uploaded, transcribed, edited, previewed, or rendered |
 
 If a check fails, report it as incomplete with the next proposed mutation; do
 not call the environment “ready.” Do not alter original media in setup. The
 later editing workflow keeps new artifacts adjacent to its source under `edit/`.
-If HyperFrames was not explicitly approved and installed, skip all of its Repo,
-Node, `bun.lock`, and Core Skills checks and report “HyperFrames 未要求”; that is
-not a setup failure.
+An existing Node.js older than 22 is a stop, not something to replace: report
+it and propose a separate version-manager setup.

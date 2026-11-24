@@ -4,6 +4,7 @@
 #   install_missing.sh --step 1 --yes      # run it after the user's one approval
 # Step 1: uv, Agent Reach (official GitHub release), hosted ElevenLabs MCP entry.
 # Step 2: FFmpeg, video-use (official repo) + uv sync, Skill links, subtitle font,
+#         Node.js (only if absent) + HyperFrames CLI and its render browser,
 #         and an empty protected .env for the ElevenLabs API key.
 # Hard stops (dirty repo, wrong origin, non-regular font path, foreign symlink)
 # are never overridden. Nothing here uploads media or prints a credential.
@@ -25,6 +26,7 @@ VIDEO_USE_ORIGIN=https://github.com/browser-use/video-use.git
 AGENT_REACH_RELEASE=https://github.com/Panniantong/Agent-Reach/releases/latest/download/agent-reach.zip
 ELEVENLABS_MCP_URL=https://api.elevenlabs.io/v1/mcp
 FONT_SOURCE=https://github.com/adobe-fonts/source-han-sans/raw/release/SubsetOTF/TW
+HYPERFRAMES_VERSION=${HYPERFRAMES_VERSION:-0.9.86}
 OS=$(uname -s)
 
 failed=""
@@ -178,6 +180,29 @@ step2() {
       [ "$magic" = 4f54544f ] && ok "font-$weight" || stop "not a valid OpenType font: $font_file (left in place for review)" font
     done
     if [ "$YES" = yes ] && [ "$OS" = Linux ] && command -v fc-cache >/dev/null 2>&1; then fc-cache -f "$font_dir" >/dev/null 2>&1; fi
+  fi
+
+  # Captions and CSS effects: HyperFrames CLI (pinned) and its own render browser.
+  # An existing Node.js older than 22 is never replaced here (hard stop).
+  if ! command -v node >/dev/null 2>&1; then
+    if [ "$OS" = Darwin ] && command -v brew >/dev/null 2>&1; then
+      todo "brew install node (Node.js for HyperFrames captions and effects)"
+      run brew install node && ok node || stop "brew install node failed" node
+    else
+      stop "Node.js 22+ is missing. Ask the user to install the LTS from https://nodejs.org, then rerun" node
+    fi
+  fi
+  node_major=$(node -p 'process.versions.node.split(".")[0]' 2>/dev/null || echo 0)
+  if command -v node >/dev/null 2>&1 && [ "${node_major:-0}" -lt 22 ] 2>/dev/null; then
+    stop "Node.js $(node --version) is older than 22; ask before installing a newer one beside it" hyperframes
+  elif command -v npx >/dev/null 2>&1 || [ "$YES" != yes ]; then
+    if npx --no-install "hyperframes@$HYPERFRAMES_VERSION" browser path >/dev/null 2>&1; then
+      :
+    else
+      todo "download hyperframes@$HYPERFRAMES_VERSION (npm) and its render browser (about 320 MB on disk, measured on macOS arm64)"
+      run npx -y "hyperframes@$HYPERFRAMES_VERSION" --version >/dev/null && \
+        run npx -y "hyperframes@$HYPERFRAMES_VERSION" browser ensure && ok hyperframes || stop "HyperFrames setup failed" hyperframes
+    fi
   fi
 
   # API key file: prepared empty and protected; the user types the key themselves.

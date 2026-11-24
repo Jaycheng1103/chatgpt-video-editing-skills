@@ -45,17 +45,20 @@ Create `edit/style/style-recipe.md`:
 # 風格配方
 - 參考來源：<url 或檔名>（只研究風格，不使用其畫面、音樂、標誌或文字）
 - 節奏：平均 X 秒一個鏡頭；開頭 3 秒內 N 刀
-- 字幕：位置／字級／顏色／外框；每行最多 N 字；重點字 <顏色>
+- 字幕：顏色／外框；重點字 <顏色>（一行、每行最多 8 字是固定規則，不跟參考影片改）
+- 特效：大字重點／步驟標籤／清單卡／推近，各大約幾秒一次
 - 鏡頭：每 N 句推近一次（約 110–120%）／不推近
 - 圖卡：<有／無，樣式>
 - 音樂：<有／無／未檢查>；我們的做法：<不加或使用者提供的音樂>
 - 無法照做的部分與原因：
 ```
 
-Map each item to something the toolkit can do with FFmpeg, Pillow, and the
-Source Han Sans TW font. Use HyperFrames only if the user approves an animation
-that needs it. Music is added only if the user supplies or approves a track
-they have the right to use.
+Map each item to something the toolkit can do: cuts and punch-ins with FFmpeg,
+captions and effects with the CSS overlay in
+[captions and effects](captions-and-effects.md) (accent colour, highlight words,
+effect types and density). Even when the reference shows two-line captions,
+keep one line of at most 8 characters. Music is added only if the user supplies
+or approves a track they have the right to use.
 
 ## 4. Rules
 
@@ -63,5 +66,6 @@ they have the right to use.
   frames, audio, or text into the output.
 - Do not imitate a creator's logo, watermark, catchphrase, or face.
 - If no reference is given, use the clean default: cuts on sentence boundaries,
-  light punch-ins every few sentences, white subtitles with a dark outline in the
-  lower-middle safe area, no music.
+  light punch-ins every few sentences, one-line white captions with a dark
+  outline in the caption band, yellow highlight words, a keyword or step effect
+  every 4–8 seconds where the speech calls for it, no music.

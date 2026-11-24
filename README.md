@@ -9,12 +9,12 @@
 | 步驟 | 你會做什麼 | Agent 會做什麼 |
 | --- | --- | --- |
 | 1. 串接 ElevenLabs 和安裝 Agent Reach | 在跳出的 ElevenLabs 登入頁按「允許」 | 自動檢查環境，裝好或升級 Agent Reach，把 ElevenLabs 官方雲端 MCP 加到你的 Agent |
-| 2. 安裝 AI 剪輯工具包並完成下載配置 | 說一次「好」，再把 API 金鑰貼進它幫你打開的檔案 | 一次裝好 FFmpeg、video-use、思源黑體字幕字體，並建立受保護的金鑰檔 |
+| 2. 安裝 AI 剪輯工具包並完成下載配置 | 說一次「好」，再把 API 金鑰貼進它幫你打開的檔案 | 一次裝好 FFmpeg、video-use、思源黑體字幕字體、做字幕與 CSS 特效的 HyperFrames，並建立受保護的金鑰檔 |
 | 3. 放入想要剪輯的影片 | 把影片拖進來 | 檢查影片規格，原檔不動，在旁邊建立 `edit/` |
 | 4. 取得剪輯建議並用 ElevenLabs 拿到逐字稿 | 同意上傳 | 用 ElevenLabs Scribe v2 轉出逐字時間碼，整理成編號段落，給你 4–8 句剪輯建議 |
 | 5. 詢問是否刪減逐字稿 | 說要刪哪幾段 | 只刪減與換位置，不改你說過的話 |
 | 6. 提供想參考的剪輯風格 | 貼一支 IG、TikTok、YouTube Shorts 或 X 的短影音連結 | 下載並量測節奏、看字幕樣式，寫成「風格配方」 |
-| 7. 剪輯出品 | 看 720p 預覽，說「可以」或要改哪裡 | 粗剪、字幕、混音、預覽 QA，核准後輸出並驗證 1080×1920 正式檔 |
+| 7. 剪輯出品 | 看 720p 預覽，說「可以」或要改哪裡 | 粗剪、一行最多 8 字的字幕、跟著內容出現的 CSS 特效、混音、預覽 QA，核准後輸出並驗證 1080×1920 正式檔 |
 
 每一步結束，Agent 都會用一個問題帶你進下一步。
 
@@ -22,8 +22,8 @@
 
 | Skill | 負責 | 不會做的事 |
 | --- | --- | --- |
-| [`chatgpt-video-editing-setup`](skills/chatgpt-video-editing-setup/SKILL.md) | 第 1–2 步：自動檢查（`scripts/check_env.sh`）、一次核准後安裝（`scripts/install_missing.sh`）、ElevenLabs MCP 串接、Agent Reach、video-use、FFmpeg、思源黑體 TW、金鑰檔（`scripts/prepare_key_file.sh`） | 不上傳素材、不轉寫、不剪輯 |
-| [`chatgpt-short-video-editor`](skills/chatgpt-short-video-editor/SKILL.md) | 第 3–7 步：素材檢查、逐字稿、剪輯建議、刪減、參考風格分析（`scripts/analyze_reference.sh`）、粗剪、字幕、預覽、QA 與正式輸出 | 不自己安裝或修環境；缺東西時帶你回第 1–2 步 |
+| [`chatgpt-video-editing-setup`](skills/chatgpt-video-editing-setup/SKILL.md) | 第 1–2 步：自動檢查（`scripts/check_env.sh`）、一次核准後安裝（`scripts/install_missing.sh`）、ElevenLabs MCP 串接、Agent Reach、video-use、FFmpeg、思源黑體 TW、HyperFrames、金鑰檔（`scripts/prepare_key_file.sh`） | 不上傳素材、不轉寫、不剪輯 |
+| [`chatgpt-short-video-editor`](skills/chatgpt-short-video-editor/SKILL.md) | 第 3–7 步：素材檢查、逐字稿、剪輯建議、刪減、參考風格分析（`scripts/analyze_reference.sh`）、粗剪、字幕（`scripts/build_captions.py`）、CSS 特效（`scripts/build_effects.py`）、合成（`scripts/compose_video.py`）、預覽、QA 與正式輸出 | 不自己安裝或修環境；缺東西時帶你回第 1–2 步 |
 
 ## 安裝
 
@@ -68,7 +68,7 @@ npx skills remove chatgpt-video-editing-setup chatgpt-short-video-editor
 - macOS 或 Linux。缺 FFmpeg 時，macOS 用 Homebrew 安裝；沒有 Homebrew 或 Linux 需要 `sudo` 時，Agent 會給你指令請你自己在終端機輸入密碼。
 - [ElevenLabs](https://elevenlabs.io) 帳號：官方雲端 MCP（`https://api.elevenlabs.io/v1/mcp`，用 OAuth 登入）負責串接帳號；逐字稿用 [Scribe v2](https://elevenlabs.io/docs/capabilities/speech-to-text) API 金鑰取得每個字的時間碼。兩者都會用到你帳號的額度，免費帳號每月額度有限，實際額度以 ElevenLabs 後台為準。
 - 其餘由第 1–2 步自動安裝：[uv](https://docs.astral.sh/uv/)、[Agent Reach](https://github.com/Panniantong/Agent-Reach)（只從官方 GitHub release 安裝，不用 PyPI 上同名套件）、[video-use](https://github.com/browser-use/video-use) 完整 Repo、[FFmpeg](https://ffmpeg.org/) 與 `ffprobe`、[思源黑體（Source Han Sans）](https://github.com/adobe-fonts/source-han-sans) TW 子集 OTF（SIL Open Font License 1.1）、[Pillow](https://python-pillow.github.io/)。
-- [HyperFrames](https://github.com/heygen-com/hyperframes) 只有在你要 HTML、CSS 或 GSAP 動畫時才安裝，需要 Node.js 22 或更新版本與 Bun。
+- [HyperFrames](https://github.com/heygen-com/hyperframes)（固定版本 0.9.86）在第 2 步一起安裝，用 HTML、CSS 與 GSAP 畫字幕和特效，需要 Node.js 22 或更新版本。沒有 Node.js 時 macOS 會用 Homebrew 安裝；已經有較舊的 Node.js 時 Agent 會停下來問你，不會自己換掉。
 
 自動安裝不會越過這些安全底線：既有 video-use 有未提交修改或來源不是官方 Repo 時會停下；既有字體檔、Skill 連結不覆寫；金鑰只由你自己貼進檔案。
 
@@ -123,9 +123,13 @@ Instagram 和 X 常常要登入才能下載。Agent 會請你把影片存下來�
 
 指令不等於已執行，畫面不等於完整 QA，預覽也不等於正式交付。正確順序是：完整預覽檢查 → 你核准預覽 → 渲染正式檔 → 驗證正式檔 → 交付。
 
-### 想加動畫、B-roll、音樂或 CTA
+### 字幕和特效長什麼樣子
 
-請在第 5–6 步提出或核准。這些都是 opt-in 創意決策，不是預設自動加入。簡單靜態圖卡優先使用 Pillow；只有已核准的 HTML、CSS 或 GSAP 動畫才需要 HyperFrames。
+字幕一次只有一行，每行最多 8 個字，超過就換成下一句，不會出現兩、三行疊在一起。每張字卡會輕輕彈出，重點詞換成強調色。特效跟著你講的內容出現：講到核心觀念時跳出大字重點，講「第一、第二、第三」時滑入步驟標籤，連續列舉時出現打勾清單，語氣加重的那句畫面推近。規則與時機見 [`captions-and-effects.md`](skills/chatgpt-short-video-editor/references/captions-and-effects.md)。
+
+### 想加 B-roll、音樂或 CTA
+
+請在第 5–6 步提出或核准。這些都是 opt-in 創意決策，不是預設自動加入。
 
 ## 第三方、授權與聲明
 

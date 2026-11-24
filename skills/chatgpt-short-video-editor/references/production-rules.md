@@ -17,14 +17,19 @@
   HLG-to-Rec.709 correction only when technically required or explicitly
   approved; inspect skin tones and the resulting image in the preview. Do not
   imply that an unrequested grade is corrective or desired.
-- Make simple title and information cards as static Pillow assets. HyperFrames
-  is optional and only follows an approved HTML, CSS, or GSAP animation plan.
-- Build `master.srt` using output-timeline offsets:
+- Captions and effects follow [captions and effects](captions-and-effects.md):
+  render the cut with video-use `--no-subtitles`, build one-line captions with
+  `scripts/build_captions.py` (at most 8 characters per card; a longer phrase
+  becomes the next card), draw captions and CSS effects in one transparent
+  HyperFrames layer with `scripts/build_effects.py`, and composite with
+  `scripts/compose_video.py`.
+- Caption times use output-timeline offsets:
   `output_time = word.start - segment_start + segment_offset`.
-- Burn subtitles with the installed Source Han Sans TW font. If the font is
+- Captions use the installed Source Han Sans TW Bold font. If the font is
   missing or fails verification, stop and hand off to the setup Skill; do not
   silently substitute another font or accept missing-glyph boxes.
-- Apply subtitles last, after all overlays and cards, so they remain visible.
+- Captions are the top layer of the overlay, above every effect and card, so
+  they remain visible. Never show two or three caption lines at once.
 - Keep source audio intelligible; preserve approved music and effects only.
 
 ## Preview, QA, and retry limit

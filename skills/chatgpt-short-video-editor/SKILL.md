@@ -13,7 +13,7 @@ step's work, checkpoint, and closing question.
 ## Before step 3
 
 Run the setup Skill's read-only `scripts/check_env.sh`. If `video-use`,
-`FFmpeg`, `ffprobe`, the Source Han Sans TW font, the ElevenLabs key, the
+`FFmpeg`, `ffprobe`, the Source Han Sans TW font, Node.js 22+, HyperFrames, the ElevenLabs key, the
 ElevenLabs MCP, or Agent Reach is missing or stopped, explain it in one plain
 sentence and offer to go back to step 1 or 2 with `chatgpt-video-editing-setup`.
 Never install, clone, update, or repair anything from this Skill.
@@ -36,7 +36,8 @@ Never install, clone, update, or repair anything from this Skill.
    per [the style reference guide](references/style-reference.md). Offer a clean
    default if they have none.
 7. **剪輯出品**：逐段粗剪 → 轉色／圖卡／字幕 → 混音與完整預覽 → QA 與正式定稿, following
-   [the production rules](references/production-rules.md). Render a complete
+   [the production rules](references/production-rules.md) and
+   [captions and effects](references/captions-and-effects.md). Render a complete
    720p preview, ask for approval, then render and verify the 1080×1920 final.
 
 ## Conversation rules
@@ -49,7 +50,14 @@ Never install, clone, update, or repair anything from this Skill.
 - Do not upload without consent, and do not claim a transcript, preview, QA
   pass, or final exists until you have produced and checked it.
 
-## Edit-quality rules (unchanged)
+## Caption and effect rules
+
+- 字幕一次一行，每行最多 8 個字；超過就變成下一句字幕，絕不出現兩、三行。用
+  `scripts/build_captions.py` 產生並驗證，不要手寫 SRT 或沿用 video-use 內建字幕。
+- 特效用 CSS（HyperFrames）做得活潑：字幕彈入、重點字變色、大字重點、步驟標籤、
+  清單打勾、推近。特效要跟著講話內容出現，有理由才加，不遮臉、不遮正在示範的畫面。
+
+## Edit-quality rules
 
 Use word-level verbatim timestamps, cached per unchanged source. Never cut
 inside a word. Keep 30–200ms padding around cut edges with about 30ms audio

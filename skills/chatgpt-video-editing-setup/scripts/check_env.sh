@@ -8,6 +8,7 @@ set -u
 VIDEO_USE_DIR="$HOME/Developer/video-use"
 VIDEO_USE_ORIGIN=https://github.com/browser-use/video-use.git
 ELEVENLABS_MCP_URL=https://api.elevenlabs.io/v1/mcp
+HYPERFRAMES_VERSION=${HYPERFRAMES_VERSION:-0.9.86}
 
 need1=""
 need2=""
@@ -171,6 +172,27 @@ elif [ -f "$env_file" ] && [ ! -L "$env_file" ] && grep -q '^ELEVENLABS_API_KEY=
   else say elevenlabs-key info "local file present but mode is $mode; tighten to 600"; add2 elevenlabs-key; fi
 else
   say elevenlabs-key missing "needed for word-level transcripts"; add2 elevenlabs-key
+fi
+
+# --- step 2: captions and CSS effects (HyperFrames; Node.js 22+, its own Chrome)
+if command -v node >/dev/null 2>&1; then
+  node_major=$(node -p 'process.versions.node.split(".")[0]' 2>/dev/null || echo 0)
+  if [ "${node_major:-0}" -ge 22 ] 2>/dev/null; then say node ok "$(node --version)"
+  else say node stop "found $(node --version 2>/dev/null); HyperFrames needs Node.js 22+. Do not replace the user's Node without asking"; fi
+else
+  say node missing "Node.js 22+ for HyperFrames captions and effects"; add2 node
+fi
+if command -v npx >/dev/null 2>&1 && npx --no-install "hyperframes@$HYPERFRAMES_VERSION" --version >/dev/null 2>&1; then
+  say hyperframes ok "hyperframes@$HYPERFRAMES_VERSION cached"
+  chrome=$(npx --no-install "hyperframes@$HYPERFRAMES_VERSION" browser path 2>/dev/null | tail -n 1)
+  if [ -n "$chrome" ] && [ -e "$chrome" ]; then say hyperframes-chrome ok "$chrome"
+  else say hyperframes-chrome missing "render browser not downloaded"; add2 hyperframes; fi
+else
+  say hyperframes missing "hyperframes@$HYPERFRAMES_VERSION (CSS captions and effects)"; add2 hyperframes
+fi
+if command -v ffmpeg >/dev/null 2>&1; then
+  if ffmpeg -hide_banner -decoders 2>/dev/null | grep -q libvpx-vp9; then say ffmpeg-vp9-alpha ok "libvpx-vp9 decoder (reads the transparent effects layer)"
+  else say ffmpeg-vp9-alpha stop "this FFmpeg cannot decode VP9 with alpha; the effects layer cannot be composited"; fi
 fi
 
 # --- optional reference downloader -------------------------------------------

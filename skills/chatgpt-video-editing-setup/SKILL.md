@@ -1,6 +1,6 @@
 ---
 name: chatgpt-video-editing-setup
-description: "Guide steps 1–2 of the seven-step AI short-video workflow: check the machine automatically, connect the hosted ElevenLabs MCP, install or upgrade Agent Reach, then install the editing toolkit (video-use, FFmpeg, Source Han Sans TW subtitle font) and the ElevenLabs API key file in one approved pass. Use whenever a user wants to install, set up, fix, reconnect, or check the AI short-video editing environment, connect ElevenLabs, or install Agent Reach for this workflow. Do not use for Premiere or CapCut help, or to edit/transcribe media; hand those to chatgpt-short-video-editor once setup is verified."
+description: "Guide steps 1–2 of the seven-step AI short-video workflow: check the machine automatically, connect the hosted ElevenLabs MCP, install or upgrade Agent Reach, then install the editing toolkit (video-use, FFmpeg, Source Han Sans TW subtitle font, HyperFrames for one-line captions and CSS effects) and the ElevenLabs API key file in one approved pass. Use whenever a user wants to install, set up, fix, reconnect, or check the AI short-video editing environment, connect ElevenLabs, or install Agent Reach for this workflow. Do not use for Premiere or CapCut help, or to edit/transcribe media; hand those to chatgpt-short-video-editor once setup is verified."
 ---
 
 # ChatGPT Video Editing Setup（第 1–2 步）
@@ -47,7 +47,9 @@ leads the user into step 3. It never uploads, transcribes, edits, or renders med
 
 1. Run `sh scripts/install_missing.sh --step 2` (dry run) and turn its `PLAN`
    lines into a plain list with rough sizes (FFmpeg via Homebrew, video-use
-   repository plus Python packages, two ~6 MB font files, the key file).
+   repository plus Python packages, two ~6 MB font files, HyperFrames and its
+   render browser for captions and CSS effects at about 320 MB, Node.js only if
+   it is missing, the key file).
    Ask once for approval of the whole list. One yes covers that list only;
    anything new found later needs its own question.
 2. After the yes, run `sh scripts/install_missing.sh --step 2 --yes`.
@@ -76,5 +78,6 @@ leads the user into step 3. It never uploads, transcribes, edits, or renders med
 - Never ask for, print, log, or commit an API key; never read `.env` contents
   beyond the presence check.
 - Setup does no paid work: no upload, transcription, or test call to ElevenLabs.
-- HyperFrames is optional; install it only if the user asks for HTML/CSS/GSAP
-  animation (Node.js 22+ required). Otherwise report 「HyperFrames 未要求」.
+- HyperFrames is part of step 2: it draws the one-line captions and the CSS
+  effects. It needs Node.js 22+. Never replace an existing older Node.js; report
+  it as a stop and ask about a separate version-manager setup.

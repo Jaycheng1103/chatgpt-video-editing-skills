@@ -84,14 +84,15 @@
       ]
     },
     {
-      "id": "hyperframes-fallback",
+      "id": "captions-one-line-eight-chars",
       "skill": "chatgpt-short-video-editor",
-      "context": "The approved strategy has no HTML, CSS, or GSAP animation requirement.",
-      "prompt": "開始做一支乾淨的口播短片。",
+      "context": "The approved strategy is a clean talking-head short; the transcript has long sentences such as 它也能變現的核心關鍵是你知道你流量的目標在哪裡.",
+      "prompt": "開始做一支乾淨的口播短片，字幕照規則。",
       "expect": [
-        "does not require HyperFrames",
-        "uses the normal video-use, FFmpeg, ffprobe, and Pillow workflow",
-        "only offers HyperFrames after approval when the strategy specifically needs HTML, CSS, or GSAP animation"
+        "renders the cut with video-use --no-subtitles and builds captions with scripts/build_captions.py",
+        "every caption card is one line of at most 8 characters; a longer phrase becomes the next card, never a second or third line",
+        "does not split inside a word, an English word, or a number, and shows no punctuation",
+        "does not continue to render when build_captions.py prints CAPTION_FAIL"
       ]
     },
     {
@@ -130,12 +131,12 @@
     {
       "id": "hyperframes-node-too-old",
       "skill": "chatgpt-video-editing-setup",
-      "context": "The user explicitly approved HyperFrames, but node --version reports v20.19.0.",
-      "prompt": "請繼續安裝 HyperFrames 和它的 Core Skills。",
+      "context": "Step 2 dry run; node --version reports v20.19.0.",
+      "prompt": "好，第 2 步全部幫我裝。",
       "expect": [
-        "parses the installed Node major version and requires Node 22 or newer",
-        "stops before cloning, bun install, npx, or Skill registration",
-        "proposes an isolated version-manager approach and does not change system Node without approval"
+        "parses the installed Node major version and requires Node 22 or newer for HyperFrames",
+        "installs the other step-2 items but reports HyperFrames as stopped, not ready",
+        "proposes an isolated version-manager approach as a separate question and does not replace the user's Node without approval"
       ]
     },
     {
@@ -150,14 +151,15 @@
       ]
     },
     {
-      "id": "hyperframes-skipped-verification",
-      "skill": "chatgpt-video-editing-setup",
-      "context": "The user did not request or approve HyperFrames; video-use setup is otherwise ready.",
-      "prompt": "只檢查基本剪輯環境，不要裝動畫工具。",
+      "id": "css-effects-from-meaning",
+      "skill": "chatgpt-short-video-editor",
+      "context": "Captions passed. The speaker says 第一步…第二步…第三步, lists 報名、出席、直播 over a laptop screen demo, and stresses one conclusion.",
+      "prompt": "幫我加一些特效，畫面不要太呆板。",
       "expect": [
-        "does not require Node 22, the HyperFrames repository, bun.lock, or Core Skills",
-        "reports HyperFrames as not requested rather than failed or missing",
-        "can report base readiness from the required video-use checks alone"
+        "writes effects/plan.json with step chips for the three steps, a keyword for the conclusion, and a punch-in on the stressed sentence",
+        "does not place a list card over the laptop screen being demonstrated",
+        "keeps effects one at a time, keyword text at most 8 characters, curved eases, no emoji or music unless asked",
+        "runs hyperframes check with 0 errors, renders a transparent WebM, and composites with compose_video.py with captions on top"
       ]
     },
     {

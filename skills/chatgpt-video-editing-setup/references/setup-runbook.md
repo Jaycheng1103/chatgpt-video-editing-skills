@@ -14,10 +14,11 @@ repository, a missing `origin`, or another transport form, and never rewrite a
 remote automatically:
 
 - video-use: `https://github.com/browser-use/video-use.git`
-- HyperFrames: `https://github.com/heygen-com/hyperframes.git`
+- HyperFrames CLI: the npm package `hyperframes`, pinned to `0.9.86`
+  (`npx -y hyperframes@0.9.86`), from `https://github.com/heygen-com/hyperframes`.
+  No source checkout is needed.
 
-Check the required video-use location before acting. Check HyperFrames only if
-the user explicitly requested or approved it. Do not inspect only for a `.git`
+Check the required video-use location before acting. Do not inspect only for a `.git`
 directory: in a linked worktree, `.git` is a file. The following preflight
 recognizes both normal checkouts and linked worktrees, and rejects any existing
 path that is not the expected clean repository:
@@ -98,29 +99,23 @@ if command -v fc-list >/dev/null 2>&1; then
 fi
 ```
 
-When HyperFrames is requested, also require a real Node.js major-version check
-before proposing any HyperFrames mutation:
+HyperFrames draws the captions and CSS effects, so it is part of step 2. It
+needs Node.js 22 or newer and downloads its own headless Chrome:
 
 ```sh
-command -v node npm npx bun
 node_major=$(node -p 'process.versions.node.split(".")[0]') || exit 1
 case "$node_major" in *[!0-9]*|'') exit 1 ;; esac
 [ "$node_major" -ge 22 ] || {
   printf '%s\n' "STOP: HyperFrames requires Node.js 22 or newer; found major $node_major" >&2
   exit 1
 }
-
-hyperframes_origin=https://github.com/heygen-com/hyperframes.git
-inspect_repo "$HOME/Developer/hyperframes" "$hyperframes_origin" || {
-  result=$?
-  [ "$result" -eq 2 ] || exit 1
-}
+npx --no-install hyperframes@0.9.86 browser path
 ```
 
-If Node is older than 22, stop and propose an isolated version-manager setup as
-a separate approval item. Do not replace or change the system Node.js without
-approval. If HyperFrames was not requested, do not run its Node or repository
-checks; report `HyperFrames 未要求`.
+If Node.js is absent, `install_missing.sh` proposes `brew install node` on
+macOS. If an older Node.js is present, stop: propose an isolated
+version-manager setup as a separate approval item and never replace or change
+the user's existing Node.js on your own.
 
 Before mutation, show an approval checklist tailored to what is missing:
 
@@ -243,61 +238,21 @@ font, treat that as a separate approval item and follow the official
 `SourceHanSansReadMe.pdf` in the upstream repository for the configuration
 choice.
 
-## 4. Install optional HyperFrames source and Skills
+## 4. Install HyperFrames for captions and CSS effects
 
-Only offer this when the user needs HTML/CSS/GSAP animation or asks for it.
-Use `https://github.com/heygen-com/hyperframes.git` at
-`~/Developer/hyperframes`. Default to a source-only checkout so LFS media
-baselines are not downloaded:
+Part of the step-2 approval list. Use the pinned npm CLI; no repository clone,
+`bun install`, or HyperFrames agent Skills are needed for this workflow:
 
 ```sh
-node_major=$(node -p 'process.versions.node.split(".")[0]') || exit 1
-case "$node_major" in *[!0-9]*|'') exit 1 ;; esac
-[ "$node_major" -ge 22 ] || exit 1
-GIT_LFS_SKIP_SMUDGE=1 git clone https://github.com/heygen-com/hyperframes.git "$HOME/Developer/hyperframes"
-inspect_repo "$HOME/Developer/hyperframes" "https://github.com/heygen-com/hyperframes.git"
-cd "$HOME/Developer/hyperframes"
-bun install --frozen-lockfile
+npx -y hyperframes@0.9.86 --version
+npx -y hyperframes@0.9.86 browser ensure
 ```
 
-Honor the checkout's current lockfile and documented package manager. The
-current upstream source uses `bun.lock`; if that changes, stop and follow the
-then-current project documentation after approval. A full LFS baseline or any
-large download requires separate explicit approval.
-
-In an attended interactive terminal, open the full-depth picker:
+The two downloads take about 320 MB on disk (measured on macOS arm64). Also
+confirm FFmpeg can decode VP9 with alpha, which the composite step needs:
 
 ```sh
-npx skills add heygen-com/hyperframes --full-depth
-```
-
-The picker opens with nothing selected. Explicitly tell the user to select the
-**Core Skills** group; that is the recommended set. Do not run this picker from
-an agent or other non-interactive environment because an unscoped
-non-interactive install can select all 19 Skills.
-
-For an agent or other non-interactive environment, install exactly the core set
-with the upstream CLI:
-
-```sh
-npx hyperframes skills update
-```
-
-Rerun `inspect_repo` immediately before either Skills command. The Node.js 22+
-check also applies before `bun install`, `npx`, or any HyperFrames Skill
-registration.
-
-Only after the user explicitly approves installing all 19 Skills may you run:
-
-```sh
-npx skills add heygen-com/hyperframes --all --full-depth
-```
-
-For any local `npx` verification on this machine, isolate npm's cache rather
-than changing cache ownership:
-
-```sh
-npm_config_cache=/private/tmp/hyperframes-npx-cache npx --yes hyperframes --help
+ffmpeg -hide_banner -decoders | grep libvpx-vp9
 ```
 
 ## 5. Local, no-cost verification
@@ -322,28 +277,16 @@ if command -v fc-list >/dev/null 2>&1; then
 fi
 ```
 
-Run the optional checks only when HyperFrames was explicitly approved **and**
-installed in this setup:
+Verify HyperFrames and its render browser:
 
 ```sh
-if [ "$hyperframes_approved" = yes ] && [ "$hyperframes_installed" = yes ]; then
-  inspect_repo "$HOME/Developer/hyperframes" "https://github.com/heygen-com/hyperframes.git"
-  node_major=$(node -p 'process.versions.node.split(".")[0]') || exit 1
-  case "$node_major" in *[!0-9]*|'') exit 1 ;; esac
-  [ "$node_major" -ge 22 ] || exit 1
-  test -f "$HOME/Developer/hyperframes/bun.lock"
-  npx skills list
-else
-  printf '%s\n' 'HyperFrames 未要求；未執行 Repo、Node、bun.lock 或 Core Skills 檢查。'
-fi
+node_major=$(node -p 'process.versions.node.split(".")[0]') || exit 1
+[ "$node_major" -ge 22 ] || exit 1
+npx --no-install hyperframes@0.9.86 --version
+chrome=$(npx --no-install hyperframes@0.9.86 browser path | tail -n 1)
+test -e "$chrome"
+ffmpeg -hide_banner -decoders | grep -q libvpx-vp9
 ```
-
-Set the two gate values from this setup session's explicit approval record and
-observed install result; do not infer them merely because a path exists. A
-skipped optional check is “not requested,” not a setup failure. Compare the
-active agent's listed Skills with the exact Core Skills outcome recorded by the
-approved `npx hyperframes skills update`; do not rerun an installer merely to
-verify it.
 
 Then use the checks in [security and verification](security-and-verification.md).
 Do not pass media to any API, invoke transcription, create `edit/`, render, or

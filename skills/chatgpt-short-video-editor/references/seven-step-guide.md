@@ -87,7 +87,8 @@ Run by `chatgpt-video-editing-setup`. They end with:
 - Checkpoint: recipe written, or the user chose the clean default.
 - Closing question:
   「我看完了：這支大約 1.8 秒換一個畫面，字幕在畫面中下方、白字黑邊，重點字放大變黃。
-  我照這個方向剪，先給你一支 720p 預覽看看，可以開始嗎？」
+  我照這個方向剪，字幕一次一行、每行最多 8 個字，重點的地方加上彈出大字和步驟標籤，
+  先給你一支 720p 預覽看看，可以開始嗎？」
 
 ## 第 7 步：剪輯出品
 
@@ -95,7 +96,9 @@ Follow [the production rules](production-rules.md) in this order:
 逐段粗剪 → 轉色／圖卡／字幕 → 混音與完整預覽 → QA 與正式定稿.
 
 1. Build `edl.json` from the kept paragraphs on word boundaries, render each
-   segment, apply the style recipe, burn subtitles last with Source Han Sans TW.
+   segment without video-use's own subtitles, then follow
+   [captions and effects](captions-and-effects.md): one-line captions of at most
+   8 characters, CSS effects triggered by what is said, captions on top.
 2. Render the complete 720p `preview.mp4`, run the preview QA, and fix at most
    three evidence-backed problems yourself.
 3. Ask: 「預覽好了：<路徑>。看完告訴我哪裡要改，或回我『可以』，我就輸出正式版。」

@@ -66,7 +66,7 @@ require_phrase() {
 require_file_phrase() {
   file=$1
   phrase=$2
-  grep -F "$phrase" "$file" >/dev/null 2>&1 ||
+  grep -F -e "$phrase" "$file" >/dev/null 2>&1 ||
     fail "missing required contract phrase in $file: $phrase"
 }
 
@@ -113,7 +113,8 @@ for eval_id in \
   linked-worktree-repository-inspection \
   hyperframes-node-too-old \
   linux-env-permission-verification \
-  hyperframes-skipped-verification; do
+  captions-one-line-eight-chars \
+  css-effects-from-meaning; do
   require_file_phrase "$EVALS" "\"id\": \"$eval_id\""
 done
 
@@ -122,7 +123,8 @@ for file in "$SETUP_RUNBOOK" "$FULL_PROMPT"; do
   require_file_phrase "$file" 'git -C "$repo" rev-parse --verify HEAD'
   require_file_phrase "$file" 'git -C "$repo" remote get-url origin'
   require_file_phrase "$file" 'https://github.com/browser-use/video-use.git'
-  require_file_phrase "$file" 'https://github.com/heygen-com/hyperframes.git'
+  require_file_phrase "$file" 'https://github.com/heygen-com/hyperframes'
+  require_file_phrase "$file" 'hyperframes@0.9.86'
   require_file_phrase "$file" '[ "$actual_origin" = "$expected_origin" ] ||'
   require_file_phrase "$file" 'node_major=$(node -p'
   require_file_phrase "$file" '[ "$node_major" -ge 22 ] ||'
@@ -132,9 +134,16 @@ for file in "$SETUP_RUNBOOK" "$FULL_PROMPT"; do
   require_file_phrase "$file" '[ "$magic" = 4f54544f ] ||'
 done
 
-require_file_phrase "$SETUP_RUNBOOK" 'HyperFrames 未要求'
-require_file_phrase "$SETUP_RUNBOOK" 'if [ "$hyperframes_approved" = yes ] && [ "$hyperframes_installed" = yes ]; then'
-require_file_phrase "$FULL_PROMPT" 'HyperFrames 未要求'
+require_file_phrase "$SETUP_RUNBOOK" 'browser ensure'
+require_file_phrase "$FULL_PROMPT" '每行最多 8 個字'
+CAPTIONS_REF="skills/chatgpt-short-video-editor/references/captions-and-effects.md"
+require_file_phrase "$CAPTIONS_REF" '每行最多 8 個字'
+require_file_phrase "$CAPTIONS_REF" '--no-subtitles'
+for script in build_captions.py build_effects.py compose_video.py; do
+  test -f "skills/chatgpt-short-video-editor/scripts/$script" || fail "missing script: $script"
+  python3 -c 'import ast, sys; ast.parse(open(sys.argv[1], encoding="utf-8").read())' \
+    "skills/chatgpt-short-video-editor/scripts/$script" || fail "script does not parse: $script"
+done
 require_file_phrase "README.md" 'Node.js 22 或更新版本'
 require_file_phrase "README.md" '思源黑體'
 require_file_phrase "THIRD_PARTY_NOTICE.md" 'SIL Open Font License 1.1'
