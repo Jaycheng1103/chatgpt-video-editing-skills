@@ -56,17 +56,28 @@ Run by `chatgpt-video-editing-setup`. They end with:
 - Write `edit/corrected-transcript.md` as numbered paragraphs（①②③…）with a
   start time each, fixing only obvious misrecognitions (mark them). Never
   invent words the speaker did not say.
+- Label each paragraph with the five-part script shape 鉤子、情境、挑戰、行動、收穫
+  (鉤子 = why should I care, plus the 憑什麼 line; 情境 = where we are;
+  挑戰 = where it got stuck; 行動 = what changed; 收穫 = so what, what the
+  viewer takes away). Paragraphs that fit none are candidates to drop. If the
+  user wrote the script with `shortvideo-funnel-script`, ask once whether they
+  want to paste it and use its parts as the labels; never add lines from the
+  script that were not actually said.
 - Give the 剪輯建議: a 4–8 sentence plain-language strategy (who it is for,
-  the hook, the story shape, what to keep, what to drop and why, estimated
-  length). Suggest specific paragraph numbers to drop.
+  which sentence opens as the 鉤子 in the first 3–5 seconds, how the five parts
+  line up, what to keep, what to drop and why, estimated length). Suggest
+  specific paragraph numbers to drop. If a part is missing, say so and suggest
+  a re-shoot of one sentence; do not invent it.
 - Checkpoint: transcript file exists and was read; strategy given.
 - Closing question leads to step 5.
 
 ## 第 5 步：刪減逐字稿
 
-- Ask: 「逐字稿和建議都在上面了。我建議刪掉第 ③、⑦ 段（重複講的地方），
-  剪完大約 70 秒。你想照這樣刪，還是有其他段落想刪或想留？」
+- Ask: 「逐字稿和建議都在上面了。我建議刪掉第 ③、⑦ 段（重複講的挑戰），
+  把第 ⑧ 段那句移到最前面當鉤子，剪完大約 70 秒。你想照這樣刪，還是有其他段落想刪或想留？」
 - Rules: deletion and reordering only; never rewrite the speaker's words.
+  Moving the strongest 鉤子 sentence to the front is a reorder and is allowed;
+  keep 情境 → 挑戰 → 行動 → 收穫 in their spoken order unless the user asks.
   Apply exactly what the user chose, then show the remaining paragraphs and the
   new estimated length. The user's confirmation is the approved strategy.
 - Checkpoint: the kept list is confirmed and recorded in `edit/project.md`.

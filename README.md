@@ -11,7 +11,7 @@
 | 1. 串接 ElevenLabs 和 HyperFrames By HeyGen | 在跳出的 ElevenLabs 登入頁按「允許」（用 Codex App 時，也可以自己在「外掛程式」加入 ElevenLabs 和 HyperFrames by HeyGen） | 自動檢查環境，把 ElevenLabs 官方雲端 MCP 加到你的 Agent，裝好或更新 HyperFrames 技能，順便裝好或升級 Agent Reach |
 | 2. 安裝 AI 剪輯工具包並完成下載配置 | 說一次「好」，再把 API 金鑰貼進它幫你打開的檔案 | 一次裝好 FFmpeg、video-use（舊版或改到一半的會先備份再更新）、思源黑體字幕字體、HyperFrames 渲染工具，並建立受保護的金鑰檔 |
 | 3. 放入想要剪輯的影片 | 把影片拖進來 | 檢查影片規格，原檔不動，在旁邊建立 `edit/` |
-| 4. 取得剪輯建議並用 ElevenLabs 拿到逐字稿 | 同意上傳 | 用 ElevenLabs Scribe v2 轉出逐字時間碼，整理成編號段落，給你 4–8 句剪輯建議 |
+| 4. 取得剪輯建議並用 ElevenLabs 拿到逐字稿 | 同意上傳；有腳本的話一起貼上 | 用 ElevenLabs Scribe v2 轉出逐字時間碼，整理成編號段落並標出鉤子、情境、挑戰、行動、收穫，給你 4–8 句剪輯建議 |
 | 5. 刪減逐字稿 | 說要刪哪幾段 | 只刪減與換位置，不改你說過的話 |
 | 6. 提供想參考的剪輯風格的短影音 | 貼一支 IG、TikTok、YouTube Shorts 或 X 的短影音連結 | 下載並量測節奏、看字幕樣式，寫成「風格配方」 |
 | 7. 剪輯出品 | 看 720p 預覽，說「可以」或要改哪裡 | 粗剪、一行最多 8 字的字幕、跟著內容出現的 CSS 特效、混音、預覽 QA，核准後輸出並驗證 1080×1920 正式檔 |
@@ -61,6 +61,8 @@ npx skills remove chatgpt-video-editing-setup chatgpt-short-video-editor
 > 請用 `chatgpt-short-video-editor` 幫我剪這支影片：`/完整/路徑/原始影片.mov`
 
 想一次給完整規格，可以複製 [`examples/完整提示詞.md`](examples/完整提示詞.md)。
+
+腳本是用 [短影音漏斗腳本發想 Skill](https://github.com/Jaycheng1103/shortvideo-funnel-script-skill)（`shortvideo-funnel-script`）寫的，第 4 步把腳本一起貼上，Agent 會照同一套五段（鉤子、情境、挑戰、行動、收穫）標逐字稿和給剪輯建議。
 
 ## 前置需求
 
